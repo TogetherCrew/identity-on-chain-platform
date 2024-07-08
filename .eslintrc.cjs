@@ -6,18 +6,23 @@ module.exports = {
     "airbnb-typescript",
     "airbnb/hooks",
     "plugin:react/recommended",
-    'eslint:recommended',
-    'plugin:@typescript-eslint/recommended',
-    'plugin:react-hooks/recommended',
-    'plugin:prettier/recommended'
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:react-hooks/recommended",
+    "plugin:prettier/recommended",
   ],
-  ignorePatterns: ['dist', '.eslintrc.cjs'],
-  parser: '@typescript-eslint/parser',
-  plugins: ['react-refresh', 'react', 'prettier'],
+  ignorePatterns: ["dist", ".eslintrc.cjs"],
+  parser: "@typescript-eslint/parser",
+  plugins: ["react-refresh", "react", "prettier"],
   rules: {
-    'react-refresh/only-export-components': [
-      'warn',
+    "react-refresh/only-export-components": [
+      "warn",
       { allowConstantExport: true },
     ],
   },
-}
+  settings: {
+    react: {
+      version: "detect",
+    },
+  },
+};
