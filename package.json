@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "format": "prettier --write ./src",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "lint:fix": "eslint src --fix && pnpm format",
+    "lint:strict": "eslint --max-warnings=0 src",
     "preview": "vite preview",
     "test": "vitest",
     "prepare": "husky install"
