@@ -1,3 +1,6 @@
+[![Maintainability](https://api.codeclimate.com/v1/badges/35792fb5b2e30c99022c/maintainability)](https://codeclimate.com/github/TogetherCrew/identity-on-chain-platform/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/35792fb5b2e30c99022c/test_coverage)](https://codeclimate.com/github/TogetherCrew/identity-on-chain-platform/test_coverage)
+
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
