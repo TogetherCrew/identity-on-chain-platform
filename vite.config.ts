@@ -13,6 +13,7 @@ export default defineConfig({
     setupFiles: ["./src/setupTests.ts"],
     coverage: {
       provider: "istanbul",
+      reporter: ["text", "lcov"],
     },
   },
   server: {
