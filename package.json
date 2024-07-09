@@ -11,6 +11,7 @@
     "lint:fix": "eslint src --fix && pnpm format",
     "lint:strict": "eslint --max-warnings=0 src",
     "preview": "vite preview",
+    "coverage": "vitest run --coverage",
     "test": "vitest",
     "prepare": "husky install"
   },
@@ -32,8 +33,10 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.6.0",
+    "@testing-library/dom": "^10.3.1",
     "@testing-library/jest-dom": "^6.4.6",
     "@testing-library/react": "^16.0.0",
+    "@testing-library/user-event": "^14.5.2",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@typescript-eslint/eslint-plugin": "^7.13.1",
