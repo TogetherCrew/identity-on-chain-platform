@@ -1,11 +1,19 @@
 import React from 'react';
 import { createBrowserRouter } from 'react-router-dom';
 import Dashboard from '@/pages/Dashboard';
+import DefaultLayout from '@/layouts/DefaultLayout';
 
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <Dashboard />,
+    element: <DefaultLayout />,
+    children: [
+      {
+        path: '/',
+        element: <Dashboard />,
+        index: true,
+      },
+    ],
   },
   {
     path: '*',
