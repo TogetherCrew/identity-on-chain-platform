@@ -16,9 +16,10 @@ export default defineConfig({
       provider: "istanbul",
     },
   },
+  server: {
+    port: 3000,
+  },
   resolve: {
-    alias: {
-      "@": path.resolve(__dirname),
-    },
+    alias: { "@": path.resolve(__dirname, "/src") },
   },
 });
