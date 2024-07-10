@@ -1,5 +1,5 @@
-[![Maintainability](https://api.codeclimate.com/v1/badges/35792fb5b2e30c99022c/maintainability)](https://codeclimate.com/github/TogetherCrew/identity-on-chain-platform/maintainability)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/35792fb5b2e30c99022c/test_coverage)](https://codeclimate.com/github/TogetherCrew/identity-on-chain-platform/test_coverage)
+[![Maintainability](https://api.codeclimate.com/v1/badges/94d9f25b5a7480c7f98e/maintainability)](https://codeclimate.com/github/TogetherCrew/identity-on-chain-platform/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/94d9f25b5a7480c7f98e/test_coverage)](https://codeclimate.com/github/TogetherCrew/identity-on-chain-platform/test_coverage)
 
 # React + TypeScript + Vite
 
@@ -20,9 +20,9 @@ If you are developing a production application, we recommend updating the config
 export default {
   // other rules...
   parserOptions: {
-    ecmaVersion: "latest",
-    sourceType: "module",
-    project: ["./tsconfig.json", "./tsconfig.node.json"],
+    ecmaVersion: 'latest',
+    sourceType: 'module',
+    project: ['./tsconfig.json', './tsconfig.node.json'],
     tsconfigRootDir: __dirname,
   },
 };
