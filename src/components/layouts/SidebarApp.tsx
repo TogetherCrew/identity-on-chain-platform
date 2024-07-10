@@ -1,5 +1,5 @@
 import { Drawer, List, ListItem, ListItemText } from '@mui/material';
-import { DRAWER_WIDTH } from '@/libs/constants';
+import { DRAWER_WIDTH } from '../../libs/constants';
 
 function SidebarApp() {
   return (

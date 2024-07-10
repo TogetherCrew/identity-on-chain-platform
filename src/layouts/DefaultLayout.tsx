@@ -1,6 +1,6 @@
 import { Box } from '@mui/material';
 import { Outlet } from 'react-router-dom';
-import SidebarApp from '@/components/layouts/SidebarApp';
+import SidebarApp from '../components/layouts/SidebarApp';
 
 function DefaultLayout() {
   return (
