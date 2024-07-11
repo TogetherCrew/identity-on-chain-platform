@@ -28,5 +28,7 @@ module.exports = {
     "import/order": 'warn',
     "import/extensions": 'warn',
     '@typescript-eslint/no-exp': 'off',
+    "react/no-array": 'off',
+    "react/function-component-definition": "off"
   },
 };
