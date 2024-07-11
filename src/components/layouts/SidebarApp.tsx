@@ -1,9 +1,23 @@
-import { Drawer, List, ListItem, ListItemText } from '@mui/material';
-import { DRAWER_WIDTH } from '../../libs/constants';
+import {
+  Drawer,
+  List,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Box,
+  Toolbar,
+  Divider,
+  Typography,
+} from '@mui/material';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { DRAWER_WIDTH, SIDEBAR_MENU } from '../../libs/constants';
 
 function SidebarApp() {
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+
   return (
-    <div>
+    <Box display="flex">
       <Drawer
         variant="permanent"
         sx={{
@@ -15,16 +29,38 @@ function SidebarApp() {
           },
         }}
       >
+        <Toolbar>
+          <Box
+            sx={{
+              width: '100%',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            <Typography variant="h6" fontWeight="bold">
+              LOGO
+            </Typography>
+          </Box>
+        </Toolbar>
+        <Divider />
         <List>
-          <ListItem button>
-            <ListItemText primary="Item 1" />
-          </ListItem>
-          <ListItem button>
-            <ListItemText primary="Item 2" />
-          </ListItem>
+          {SIDEBAR_MENU.map((item) => (
+            <ListItemButton
+              key={item.title}
+              sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}
+              selected={item.path === pathname}
+              onClick={() => navigate(item.path)}
+            >
+              <ListItemIcon sx={{ minWidth: 'auto' }}>
+                <item.icon />
+              </ListItemIcon>
+              <ListItemText>{item.title}</ListItemText>
+            </ListItemButton>
+          ))}
         </List>
       </Drawer>
-    </div>
+    </Box>
   );
 }
 
