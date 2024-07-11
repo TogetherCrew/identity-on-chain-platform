@@ -1,4 +1,6 @@
+import React from 'react';
 import { AppBar, Box, Toolbar } from '@mui/material';
+import AccountPopover from './AccountPopover';
 
 function AppbarApp() {
   return (
@@ -15,7 +17,17 @@ function AppbarApp() {
           backgroundColor: 'crystal.main',
         }}
       >
-        <Toolbar>skj</Toolbar>
+        <Toolbar>
+          <Box sx={{ flexGrow: 1 }} />
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+            }}
+          >
+            <AccountPopover />
+          </Box>
+        </Toolbar>
       </AppBar>
     </Box>
   );
