@@ -19,6 +19,7 @@ function SidebarApp() {
   return (
     <Box display="flex">
       <Drawer
+        data-testid="drawer_app"
         variant="permanent"
         sx={{
           width: DRAWER_WIDTH,
