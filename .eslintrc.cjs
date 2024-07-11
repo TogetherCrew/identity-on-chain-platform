@@ -26,6 +26,7 @@ module.exports = {
     'import/prefer-default-export': 'warn',
     "import/prefer-default-export": "off",
     "import/order": 'warn',
-    "import/extensions": 'warn'
+    "import/extensions": 'warn',
+    '@typescript-eslint/no-exp': 'off',
   },
 };
