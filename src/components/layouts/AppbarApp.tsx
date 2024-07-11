@@ -1,4 +1,3 @@
-import React from 'react';
 import { AppBar, Box, Toolbar } from '@mui/material';
 import AccountPopover from './AccountPopover';
 
