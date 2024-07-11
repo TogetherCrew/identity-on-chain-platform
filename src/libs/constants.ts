@@ -13,7 +13,7 @@ export const SIDEBAR_MENU: MenuItem[] = [
   },
   {
     title: 'Identifiers',
-    path: '/idenifiers',
+    path: '/identifiers',
     icon: FingerprintIcon,
   },
   {

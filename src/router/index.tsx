@@ -17,7 +17,7 @@ export const router = createBrowserRouter([
         index: true,
       },
       {
-        path: '/idenifiers',
+        path: '/identifiers',
         element: <Identifiers />,
       },
       {

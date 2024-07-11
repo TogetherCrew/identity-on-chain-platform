@@ -1,6 +1,7 @@
 import { Box } from '@mui/material';
 import { Outlet } from 'react-router-dom';
 import SidebarApp from '../components/layouts/SidebarApp';
+import AppbarApp from '../components/layouts/AppbarApp';
 
 function DefaultLayout() {
   return (
@@ -14,6 +15,7 @@ function DefaultLayout() {
           overflowX: 'hidden',
         }}
       >
+        <AppbarApp />
         <Box
           component="main"
           sx={{
