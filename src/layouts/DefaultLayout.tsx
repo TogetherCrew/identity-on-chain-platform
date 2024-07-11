@@ -1,6 +1,7 @@
-import { AppBar, Box } from '@mui/material';
+import { Box } from '@mui/material';
 import { Outlet } from 'react-router-dom';
 import SidebarApp from '../components/layouts/SidebarApp';
+import AppbarApp from '../components/layouts/AppbarApp';
 
 function DefaultLayout() {
   return (
@@ -14,14 +15,13 @@ function DefaultLayout() {
           overflowX: 'hidden',
         }}
       >
-        <AppBar>ds</AppBar>
+        <AppbarApp />
         <Box
           component="main"
           sx={{
             flexGrow: 1,
             px: 3,
             py: 2,
-            mt: 2,
             backgroundColor: (theme) => theme.palette.grey[50],
           }}
         >
