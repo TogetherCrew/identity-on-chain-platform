@@ -1,8 +1,11 @@
-// CustomTable.tsx
 import React from 'react';
-import { TableContainer, Paper, Table, TableHead, TableRow, TableCell, TableBody } from '@mui/material';
+import { TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Avatar, Typography, Card } from '@mui/material';
 import AccessControlButton from './AccessControlButton';
 
+export interface Platform {
+    name: string;
+    icon: React.ReactNode;
+}
 
 export interface AccessData {
     application: string;
@@ -17,7 +20,7 @@ export interface Column<T> {
 }
 
 export interface CustomTableProps<T> {
-    xcolumns: string[];
+    xcolumns: Platform[];
     ycolumns: T[];
     data: T[];
 }
@@ -29,25 +32,43 @@ const CustomTable: React.FC<CustomTableProps<AccessData>> = ({ xcolumns, ycolumn
     };
 
     return (
-        <TableContainer component={Paper}>
+        <TableContainer>
             <Table>
                 <TableHead>
-                    <TableRow>
-                        <TableCell /> {/* Empty cell for the top-left corner */}
+                    <TableRow component={Card}>
+                        <TableCell sx={{ padding: 1 }} align="center">
+                            <Typography fontWeight="bold">
+                                Applications \ Identifiers
+                            </Typography>
+                        </TableCell>
                         {xcolumns.map((platform, index) => (
-                            <TableCell key={index} align="center">{platform}</TableCell>
+                            <TableCell key={index} align="center" sx={{ padding: 1 }}>
+                                <div className="flex flex-row space-x-1.5 items-center justify-center">
+                                    <Avatar>
+                                        {platform.icon}
+                                    </Avatar>
+                                    <Typography>{platform.name}</Typography>
+                                </div>
+                            </TableCell>
                         ))}
                     </TableRow>
                 </TableHead>
                 <TableBody>
                     {ycolumns.map((application, rowIndex) => (
-                        <TableRow key={rowIndex}>
-                            <TableCell align="center">{application.application}</TableCell>
+                        <TableRow component={Card} key={rowIndex}>
+                            <TableCell align="center" sx={{ padding: 1 }}>
+                                <div className='flex flex-col items-center justify-center text-center mx-auto space-y-2'>
+                                    <Avatar />
+                                    <Typography>
+                                        {application.application}
+                                    </Typography>
+                                </div>
+                            </TableCell>
                             {xcolumns.map((platform, colIndex) => (
                                 <TableCell key={colIndex} align="center">
                                     <AccessControlButton
-                                        hasAccess={data[rowIndex][platform] as boolean}
-                                        onToggleAccess={() => handleToggleAccess(rowIndex, platform)}
+                                        hasAccess={data[rowIndex][platform.name] as boolean}
+                                        onToggleAccess={() => handleToggleAccess(rowIndex, platform.name)}
                                     />
                                 </TableCell>
                             ))}
