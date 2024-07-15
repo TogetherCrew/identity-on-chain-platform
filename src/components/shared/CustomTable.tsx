@@ -1,4 +1,3 @@
-import React from 'react';
 import { TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Avatar, Typography, Card } from '@mui/material';
 import AccessControlButton from './AccessControlButton';
 
