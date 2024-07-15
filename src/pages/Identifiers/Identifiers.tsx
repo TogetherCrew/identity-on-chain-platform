@@ -1,3 +1,10 @@
+
 export function Identifiers() {
-  return <div>Identifiers</div>;
+  return (
+    <div>
+      dsajk
+    </div>
+  );
 }
+
+export default Identifiers;
