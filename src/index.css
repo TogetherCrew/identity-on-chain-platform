@@ -1,3 +1,50 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@font-face {
+  font-family: Inter;
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+  src: url('../lib/fonts/inter/Inter-VariableFont_slnt\,wght.ttf')
+    format('truetype');
+}
+
+@font-face {
+  font-family: Inter;
+  font-weight: bold;
+  font-style: bold;
+  font-display: swap;
+  src: url('../lib/fonts/inter/Inter-Bold.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: Inter;
+  font-weight: medium;
+  font-style: medium;
+  font-display: swap;
+  src: url('../lib/fonts/inter/Inter-Medium.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: Inter;
+  font-weight: light;
+  font-style: light;
+  font-display: swap;
+  src: url('../lib/fonts/inter/Inter-Light.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: Roboto;
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+  src: url('../lib/fonts/roboto/roboto-v29-latin-regular.woff')
+    format('truetype');
+}
+
+*,
+body {
+  font-family: Inter;
+}
