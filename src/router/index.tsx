@@ -3,6 +3,7 @@ import { createBrowserRouter } from 'react-router-dom';
 import Dashboard from '../pages/Dashboard';
 import Identifiers from '../pages/Identifiers';
 import Permissions from '../pages/Permissions';
+import Attestation from '../pages/Identifiers/Attestation';
 
 import DefaultLayout from '../layouts/DefaultLayout';
 
@@ -19,6 +20,10 @@ export const router = createBrowserRouter([
       {
         path: '/identifiers',
         element: <Identifiers />,
+      },
+      {
+        path: '/attestation',
+        element: <Attestation />,
       },
       {
         path: '/permissions',
