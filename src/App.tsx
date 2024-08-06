@@ -75,7 +75,6 @@ const AuthenticationWrapper: React.FC = () => {
       return data;
     },
     signOut: async () => {
-      await api.post('auth/logout');
       setAuthStatus('unauthenticated');
       signOut();
     },
