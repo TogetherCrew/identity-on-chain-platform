@@ -14,6 +14,7 @@ import {
 } from '@rainbow-me/rainbowkit';
 import { WagmiProvider } from 'wagmi';
 import { sepolia } from 'viem/chains';
+import { getAddress } from 'viem';
 import { createSiweMessage } from 'viem/siwe';
 import theme from './libs/theme';
 import { router } from './router';
@@ -42,7 +43,7 @@ const AuthenticationWrapper: React.FC = () => {
     },
     createMessage: ({ nonce, address, chainId }) => {
       return createSiweMessage({
-        address,
+        address: getAddress(address),
         chainId,
         domain: window.location.host,
         nonce,
