@@ -7,6 +7,7 @@ import Permissions from '../pages/Permissions';
 import Attestation from '../pages/Identifiers/Attestation';
 
 import DefaultLayout from '../layouts/DefaultLayout';
+import ProtectedRoute from '../ProtectedRoute';
 
 export const router = createBrowserRouter([
   {
@@ -19,20 +20,36 @@ export const router = createBrowserRouter([
     children: [
       {
         path: '/',
-        element: <Dashboard />,
+        element: (
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        ),
         index: true,
       },
       {
         path: '/identifiers',
-        element: <Identifiers />,
+        element: (
+          <ProtectedRoute>
+            <Identifiers />
+          </ProtectedRoute>
+        ),
       },
       {
         path: '/attestation',
-        element: <Attestation />,
+        element: (
+          <ProtectedRoute>
+            <Attestation />
+          </ProtectedRoute>
+        ),
       },
       {
         path: '/permissions',
-        element: <Permissions />,
+        element: (
+          <ProtectedRoute>
+            <Permissions />
+          </ProtectedRoute>
+        ),
       },
     ],
   },
