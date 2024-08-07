@@ -33,7 +33,6 @@ const storeTokens = (
   tokens: Array<{ token: string; exp: number; provider: string }>
 ) => {
   localStorage.setItem('OCI_PROVIDER_TOKENS', JSON.stringify(tokens));
-  console.log('Stored OCI_PROVIDER_TOKENS in localStorage');
 };
 
 export function Callback() {
@@ -67,7 +66,7 @@ export function Callback() {
         console.error('Invalid JWT:', error);
       }
     } else {
-      console.error('No valid JWT found in query parameters');
+      navigate('/identifiers');
     }
   }, [jwt, navigate]);
 
