@@ -5,6 +5,7 @@ import Dashboard from '../pages/Dashboard';
 import Identifiers from '../pages/Identifiers';
 import Permissions from '../pages/Permissions';
 import Attestation from '../pages/Identifiers/Attestation';
+import Callback from '../pages/Callback';
 
 import DefaultLayout from '../layouts/DefaultLayout';
 import ProtectedRoute from '../ProtectedRoute';
@@ -52,6 +53,10 @@ export const router = createBrowserRouter([
         ),
       },
     ],
+  },
+  {
+    path: '/callback',
+    element: <Callback />,
   },
   {
     path: '*',
