@@ -20,6 +20,15 @@ const isJwt = (token: string): boolean => {
   return jwtRegex.test(token);
 };
 
+const getStoredTokens = (): Array<{
+  token: string;
+  exp: number;
+  provider: string;
+}> => {
+  const storedTokens = localStorage.getItem('OCI_PROVIDER_TOKENS');
+  return storedTokens ? JSON.parse(storedTokens) : [];
+};
+
 const storeTokens = (
   tokens: Array<{ token: string; exp: number; provider: string }>
 ) => {
@@ -29,39 +38,38 @@ const storeTokens = (
 
 export function Callback() {
   const queryParams = useQueryParams();
-  const jwtArray = queryParams.getAll('jwt');
+  const jwt = queryParams.get('jwt');
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (jwtArray.length > 0) {
-      const storedTokens: Array<{
-        token: string;
-        exp: number;
-        provider: string;
-      }> = [];
+    if (jwt && isJwt(jwt)) {
+      try {
+        const decodedJwt: DecodedJwt = jwtDecode(jwt);
+        const { provider, exp } = decodedJwt;
 
-      jwtArray.forEach((jwt) => {
-        if (isJwt(jwt)) {
-          try {
-            const decodedJwt: DecodedJwt = jwtDecode(jwt);
-            const { provider, exp } = decodedJwt;
-            storedTokens.push({ token: jwt, exp, provider });
+        // Retrieve existing tokens from localStorage
+        const storedTokens = getStoredTokens();
 
-            // Redirect to the current JWT provider route
-            navigate(`/identifiers/${provider}/attestation?jwt=${jwt}`);
-          } catch (error) {
-            console.error('Invalid JWT:', error);
-          }
-        } else {
-          console.error('Invalid JWT format:', jwt);
-        }
-      });
+        // Remove any existing token for the current provider
+        const updatedTokens = storedTokens.filter(
+          (token) => token.provider !== provider
+        );
 
-      storeTokens(storedTokens);
+        // Add the new token
+        updatedTokens.push({ token: jwt, exp, provider });
+
+        // Store updated tokens back to localStorage
+        storeTokens(updatedTokens);
+
+        // Redirect to the current JWT provider route
+        navigate(`/identifiers/${provider}/attestation?jwt=${jwt}`);
+      } catch (error) {
+        console.error('Invalid JWT:', error);
+      }
     } else {
-      console.error('No JWTs found in query parameters');
+      console.error('No valid JWT found in query parameters');
     }
-  }, [jwtArray, navigate]);
+  }, [jwt, navigate]);
 
   return (
     <Backdrop open>
