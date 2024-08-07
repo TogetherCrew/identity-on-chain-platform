@@ -18,7 +18,7 @@ import { getAddress } from 'viem';
 import { createSiweMessage } from 'viem/siwe';
 import theme from './libs/theme';
 import { router } from './router';
-import { api } from './api';
+import { api } from './services/api';
 import { AuthProvider, useAuth } from './context/authContext';
 
 const queryClient = new QueryClient({

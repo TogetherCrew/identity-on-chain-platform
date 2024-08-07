@@ -36,7 +36,7 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: '/attestation',
+        path: 'identifiers/:provider/attestation',
         element: (
           <ProtectedRoute>
             <Attestation />
