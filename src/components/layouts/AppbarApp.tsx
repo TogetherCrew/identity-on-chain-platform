@@ -1,5 +1,6 @@
 import { AppBar, Box, Toolbar } from '@mui/material';
 import AccountPopover from './AccountPopover';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 
 function AppbarApp() {
   return (
@@ -24,6 +25,8 @@ function AppbarApp() {
               justifyContent: 'flex-end',
             }}
           >
+            <ConnectButton />
+
             <AccountPopover />
           </Box>
         </Toolbar>

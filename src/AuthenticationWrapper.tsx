@@ -8,7 +8,7 @@ import {
 import { useState } from 'react';
 import { RouterProvider } from 'react-router-dom';
 import { getAddress } from 'viem';
-import { sepolia } from 'viem/chains';
+import { sepolia } from 'wagmi/chains';
 import { createSiweMessage } from 'viem/siwe';
 import { WagmiProvider } from 'wagmi';
 import { useAuth } from './context/authContext';
@@ -68,20 +68,17 @@ const AuthenticationWrapper: React.FC = () => {
     appName: 'RainbowKit demo',
     projectId: '1cf030f3b91e339bc4e6ecf71a694a88',
     chains: [sepolia],
+    ssr: false,
   });
 
   return (
     <WagmiProvider config={config}>
-      <RainbowKitAuthenticationProvider
-        adapter={authenticationAdapter}
-        status={authStatus}
-      >
-        <RainbowKitProvider>
-          <RouterProvider router={router} />
-        </RainbowKitProvider>
-      </RainbowKitAuthenticationProvider>
+      <RainbowKitProvider initialChain={sepolia}>
+        <RouterProvider router={router} />
+      </RainbowKitProvider>
     </WagmiProvider>
   );
 };
 
 export default AuthenticationWrapper;
+
