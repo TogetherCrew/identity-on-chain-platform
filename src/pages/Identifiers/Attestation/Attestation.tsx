@@ -10,7 +10,7 @@ import { useWriteContract, useAccount } from 'wagmi';
 import StepperComponent from '../../../components/shared/CustomStepper';
 import { platformAuthentication } from '../../../services/api/auth';
 import { useLinkIdentifierMutation } from '../../../services/api/linking/query';
-import { SUPPORTED_CHAINS } from '../../../contracts/chains/constants';
+import sepoliaChain from '../../../utils/contracts/eas/sepoliaChain.json';
 
 const steps = [{ label: 'Auth' }, { label: 'Attest' }, { label: 'Transact' }];
 
@@ -101,8 +101,8 @@ export function Attestation() {
 
   const handleAttest = () => {
     writeContract({
-      abi: SUPPORTED_CHAINS[0].easContractAbi,
-      address: SUPPORTED_CHAINS[0].easContractAddress as Address,
+      abi: sepoliaChain.easContractAbi,
+      address: sepoliaChain.easContractAddress as Address,
       functionName: 'attestByDelegation',
       args: [linkingIdentifierRequest],
     });
