@@ -4,7 +4,7 @@ import '@rainbow-me/rainbowkit/styles.css';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
 import { WagmiProvider } from 'wagmi';
 import {
   AuthenticationStatus,
@@ -27,6 +27,7 @@ import Identifiers from './pages/Identifiers';
 import Permissions from './pages/Permissions';
 import Attestation from './pages/Identifiers/Attestation';
 import Callback from './pages/Callback';
+import ProtectedRoute from './ProtectedRoute';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -119,8 +120,23 @@ const App: React.FC = () => {
               <ThemeProvider theme={theme}>
                 <CssBaseline />
                 <Routes>
-                  <Route path="/auth/login" element={<Login />} />
-                  <Route element={<DefaultLayout />}>
+                  <Route
+                    path="/auth/login"
+                    element={
+                      authStatus === 'authenticated' ? (
+                        <Navigate to="/" replace />
+                      ) : (
+                        <Login />
+                      )
+                    }
+                  />
+                  <Route
+                    element={
+                      <ProtectedRoute>
+                        <DefaultLayout />
+                      </ProtectedRoute>
+                    }
+                  >
                     <Route path="/" element={<Dashboard />} />
                     <Route path="/identifiers" element={<Identifiers />} />
                     <Route
