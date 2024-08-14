@@ -10,7 +10,7 @@ import { useWriteContract, useAccount } from 'wagmi';
 import StepperComponent from '../../../components/shared/CustomStepper';
 import { platformAuthentication } from '../../../services/api/auth';
 import { useLinkIdentifierMutation } from '../../../services/api/linking/query';
-import { SUPPORTED_CHAINS } from '@/contracts/chains/chains.constants';
+import { SUPPORTED_CHAINS } from '../../../contracts/chains/chains.constants';
 
 const steps = [{ label: 'Auth' }, { label: 'Attest' }, { label: 'Transact' }];
 
