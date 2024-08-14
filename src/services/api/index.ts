@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const baseURL = import.meta.env.VITE_API_BASE_URL;
+export const baseURL = import.meta.env.VITE_API_BASE_URL;
 
 if (!baseURL) {
   throw new Error(
@@ -8,14 +8,14 @@ if (!baseURL) {
   );
 }
 
-export const api = axios.create({
+const apiInstance = axios.create({
   baseURL,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-api.interceptors.request.use(
+apiInstance.interceptors.request.use(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (config: any) => {
     const token = localStorage.getItem('OCI_TOKEN');
@@ -35,4 +35,5 @@ api.interceptors.request.use(
   }
 );
 
-export default api;
+export default apiInstance;
+export { apiInstance as api };

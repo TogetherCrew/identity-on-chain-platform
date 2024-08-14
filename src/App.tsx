@@ -1,25 +1,33 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './App.css';
 import '@rainbow-me/rainbowkit/styles.css';
-import { RouterProvider } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import {
-  getDefaultConfig,
-  RainbowKitProvider,
-  RainbowKitAuthenticationProvider,
-  createAuthenticationAdapter,
-  AuthenticationStatus,
-} from '@rainbow-me/rainbowkit';
+import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
 import { WagmiProvider } from 'wagmi';
-import { sepolia } from 'viem/chains';
+import {
+  AuthenticationStatus,
+  createAuthenticationAdapter,
+  getDefaultConfig,
+  RainbowKitAuthenticationProvider,
+  RainbowKitProvider,
+} from '@rainbow-me/rainbowkit';
+import { sepolia } from 'wagmi/chains';
 import { getAddress } from 'viem';
 import { createSiweMessage } from 'viem/siwe';
+import Login from './pages/Auth/Login';
 import theme from './libs/theme';
-import { router } from './router';
-import { api } from './api';
-import { AuthProvider, useAuth } from './context/authContext';
+import { api } from './services/api';
+
+import DefaultLayout from './layouts/DefaultLayout';
+
+import Dashboard from './pages/Dashboard';
+import Identifiers from './pages/Identifiers';
+import Permissions from './pages/Permissions';
+import Attestation from './pages/Identifiers/Attestation';
+import Callback from './pages/Callback';
+import ProtectedRoute from './ProtectedRoute';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -31,8 +39,14 @@ const queryClient = new QueryClient({
   },
 });
 
-const AuthenticationWrapper: React.FC = () => {
-  const { setAuthInfo, signOut } = useAuth();
+const config = getDefaultConfig({
+  appName: 'RainbowKit demo',
+  projectId: '1cf030f3b91e339bc4e6ecf71a694a88',
+  chains: [sepolia],
+  ssr: false,
+});
+
+const App: React.FC = () => {
   const [authStatus, setAuthStatus] =
     useState<AuthenticationStatus>('unauthenticated');
 
@@ -65,51 +79,81 @@ const AuthenticationWrapper: React.FC = () => {
       }
 
       if (data?.jwt) {
+        localStorage.setItem('OCI_TOKEN', data.jwt);
         setAuthStatus('authenticated');
-        setAuthInfo(data.jwt);
-        window.location.replace('/');
+        return true;
+      }
+
+      return false;
+    },
+    signOut: async () => {
+      localStorage.removeItem('OCI_TOKEN');
+    },
+  });
+
+  useEffect(() => {
+    const checkStoredToken = () => {
+      const OCI_TOKEN = localStorage.getItem('OCI_TOKEN');
+      if (OCI_TOKEN) {
+        setAuthStatus('authenticated');
       } else {
         setAuthStatus('unauthenticated');
       }
+    };
 
-      return data;
-    },
-    signOut: async () => {
-      setAuthStatus('unauthenticated');
-      signOut();
-    },
-  });
+    checkStoredToken();
+  }, []);
 
-  const config = getDefaultConfig({
-    appName: 'RainbowKit demo',
-    projectId: '1cf030f3b91e339bc4e6ecf71a694a88',
-    chains: [sepolia],
-  });
+  useEffect(() => {
+    console.log('authStatus', authStatus);
+  }, [authStatus]);
 
   return (
-    <WagmiProvider config={config}>
-      <RainbowKitAuthenticationProvider
-        adapter={authenticationAdapter}
-        status={authStatus}
-      >
-        <RainbowKitProvider>
-          <RouterProvider router={router} />
-        </RainbowKitProvider>
-      </RainbowKitAuthenticationProvider>
-    </WagmiProvider>
-  );
-};
-
-const App: React.FC = () => {
-  return (
-    <AuthProvider>
-      <QueryClientProvider client={queryClient}>
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          <AuthenticationWrapper />
-        </ThemeProvider>
-      </QueryClientProvider>
-    </AuthProvider>
+    <BrowserRouter>
+      <WagmiProvider config={config}>
+        <QueryClientProvider client={queryClient}>
+          <RainbowKitAuthenticationProvider
+            adapter={authenticationAdapter}
+            status={authStatus}
+          >
+            <RainbowKitProvider initialChain={sepolia}>
+              <ThemeProvider theme={theme}>
+                <CssBaseline />
+                <Routes>
+                  <Route
+                    path="/auth/login"
+                    element={
+                      authStatus === 'authenticated' ? (
+                        <Navigate to="/" replace />
+                      ) : (
+                        <Login />
+                      )
+                    }
+                  />
+                  <Route
+                    element={
+                      <ProtectedRoute>
+                        <DefaultLayout />
+                      </ProtectedRoute>
+                    }
+                  >
+                    <Route path="/" element={<Dashboard />} />
+                    <Route path="/identifiers" element={<Identifiers />} />
+                    <Route
+                      path="identifiers/:provider/attestation"
+                      element={<Attestation />}
+                    />
+                    <Route path="/permissions" element={<Permissions />} />
+                  </Route>
+                  <Route path="/callback" element={<Callback />} />
+                  <Route path="*" element={<div>Not found</div>} />
+                </Routes>
+              </ThemeProvider>
+            </RainbowKitProvider>
+          </RainbowKitAuthenticationProvider>
+        </QueryClientProvider>
+      </WagmiProvider>
+    </BrowserRouter>
   );
 };
 

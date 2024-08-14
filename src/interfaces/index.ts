@@ -9,3 +9,7 @@ export interface MenuItem {
   };
   children?: MenuItem[];
 }
+
+export interface PlatformAuthenticationParams {
+  platformType: 'DISCORD' | 'GOOGLE';
+}

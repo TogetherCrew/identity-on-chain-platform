@@ -1,23 +1,27 @@
-import { Navigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import { Navigate } from 'react-router-dom';
 import CircularProgress from '@mui/material/CircularProgress';
 import Backdrop from '@mui/material/Backdrop';
-import { useAuth } from './context/authContext';
 
-const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
-  const { isAuthenticated } = useAuth();
-  const [loading, setLoading] = useState(true);
+interface ProtectedRouteProps {
+  children: JSX.Element;
+}
+
+const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
+  const [loading, setLoading] = useState<boolean>(true);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
   useEffect(() => {
     const checkAuthStatus = async () => {
-      setLoading(true);
-      setTimeout(() => {
-        setLoading(false);
-      }, 1000);
+      const token = localStorage.getItem('OCI_TOKEN');
+      if (token) {
+        setIsAuthenticated(true);
+      }
+      setLoading(false);
     };
 
     checkAuthStatus();
-  }, [isAuthenticated]);
+  }, []);
 
   if (loading) {
     return (
