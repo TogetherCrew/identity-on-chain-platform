@@ -1,16 +1,14 @@
-import { Address, parseAbiItem, WalletClient } from 'viem';
+import { Address, parseAbiItem } from 'viem';
 import {
   SchemaDecodedItem,
   SchemaEncoder,
 } from '@ethereum-attestation-service/eas-sdk';
 
+import * as LitJsSdk from '@lit-protocol/lit-node-client';
+import { EncryptToJsonPayload, SessionSigsMap } from '@lit-protocol/types';
 import { publicClient } from './client';
 import sepoliaChain from '../../utils/contracts/eas/sepoliaChain.json';
 
-import { LitNetwork } from '@lit-protocol/constants';
-import * as LitJsSdk from '@lit-protocol/lit-node-client';
-import { sepolia } from 'viem/chains';
-import { EncryptToJsonPayload, SessionSigsMap } from '@lit-protocol/types';
 import { SCHEMA_TYPES } from '../../utils/contracts/eas/constants';
 
 export interface IAttestation {
