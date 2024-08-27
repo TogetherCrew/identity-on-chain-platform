@@ -21,8 +21,8 @@ interface Domain {
   version: string;
 }
 
-interface AttestMessage {
-  attester: string;
+export interface AttestMessage {
+  attester?: string;
   data: string;
   expirationTime: bigint;
   nonce: bigint;
@@ -30,6 +30,13 @@ interface AttestMessage {
   refUID: string;
   revocable: boolean;
   schema: string;
+}
+
+export interface RevokeMessage {
+  nonce: string;
+  revoker: string;
+  schema: string;
+  uid: string;
 }
 
 interface Signature {
@@ -50,6 +57,14 @@ interface Types {
 export interface AttestPayload {
   domain: Domain;
   message: AttestMessage;
+  primaryType: string;
+  signature: Signature;
+  types: Types;
+}
+
+export interface RevokePayload {
+  domain: Domain;
+  message: RevokeMessage;
   primaryType: string;
   signature: Signature;
   types: Types;

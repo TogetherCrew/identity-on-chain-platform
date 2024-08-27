@@ -1,5 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import {
+  decryptAttestationsSecret,
+  DecryptAttestationsSecretParams,
   linkIdentifier,
   LinkIdentifierParams,
   revokeIdentifier,
@@ -33,5 +35,22 @@ export const useRevokeIdentifierMutation = () => {
       });
     },
     mutationKey: ['revokeIdentifier'],
+  });
+};
+
+export const useDecryptAttestationsSecretMutation = () => {
+  return useMutation({
+    mutationFn: async ({
+      uid,
+      siweJwt,
+      chainId,
+    }: DecryptAttestationsSecretParams) => {
+      return decryptAttestationsSecret({
+        uid,
+        siweJwt,
+        chainId,
+      });
+    },
+    mutationKey: ['decryptAttestationsSecret'],
   });
 };

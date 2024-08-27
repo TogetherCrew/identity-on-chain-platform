@@ -13,7 +13,7 @@ import {
 } from '@ethereum-attestation-service/eas-sdk';
 import StepperComponent from '../../../components/shared/CustomStepper';
 import { platformAuthentication } from '../../../services/api/auth';
-import { useLinkIdentifierMutation } from '../../../services/api/linking/query';
+import { useLinkIdentifierMutation } from '../../../services/api/eas/query';
 import sepoliaChain from '../../../utils/contracts/eas/sepoliaChain.json';
 import { useSigner } from '../../../utils/eas-wagmi-utils';
 import { AttestPayload } from '../../../interfaces';
