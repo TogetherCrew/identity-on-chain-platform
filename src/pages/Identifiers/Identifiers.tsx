@@ -14,12 +14,12 @@ import {
 import VerifiedIcon from '@mui/icons-material/Verified';
 import { FaDiscord, FaGoogle } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+// import { useState } from 'react';
 // import { decryptAttestation, getAttestations } from '../../libs/oci';
-import { useAccount } from 'wagmi';
-import useLit from '../../hooks/LitProvider';
-import useSessionSigs from '../../hooks/useSessionSigs';
-import { useSigner } from '../../utils/eas-wagmi-utils';
+// import { useAccount } from 'wagmi';
+// import useLit from '../../hooks/LitProvider';
+// import useSessionSigs from '../../hooks/useSessionSigs';
+// import { useSigner } from '../../utils/eas-wagmi-utils';
 // import { GraphQLClient, gql } from 'graphql-request';
 // import { useQuery } from '@tanstack/react-query';
 // import {
