@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
@@ -17,6 +17,10 @@ import { useLinkIdentifierMutation } from '../../../services/api/linking/query';
 import sepoliaChain from '../../../utils/contracts/eas/sepoliaChain.json';
 import { useSigner } from '../../../utils/eas-wagmi-utils';
 import { AttestPayload } from '../../../interfaces';
+import {
+  convertStringsToBigInts,
+  getTokenForProvider,
+} from '../../../utils/helper';
 
 const steps = [{ label: 'Auth' }, { label: 'Attest' }, { label: 'Transact' }];
 
@@ -56,21 +60,6 @@ export function Attestation() {
     );
   };
 
-  const convertStringsToBigInts = useCallback((obj: unknown): unknown => {
-    if (typeof obj === 'string' && /^[0-9]+$/.test(obj)) {
-      return BigInt(obj);
-    }
-    if (Array.isArray(obj)) {
-      return obj.map(convertStringsToBigInts);
-    }
-    if (typeof obj === 'object' && obj !== null) {
-      return Object.fromEntries(
-        Object.entries(obj).map(([k, v]) => [k, convertStringsToBigInts(v)])
-      );
-    }
-    return obj;
-  }, []);
-
   useEffect(() => {
     if (linkingIdentifier) {
       const payload: AttestPayload = convertStringsToBigInts(
@@ -80,7 +69,7 @@ export function Attestation() {
       setLinkingIdentifierRequest(payload);
       handleNext();
     }
-  }, [convertStringsToBigInts, linkingIdentifier]);
+  }, [linkingIdentifier]);
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
@@ -126,16 +115,6 @@ export function Attestation() {
     } finally {
       setIsAuthorizing(false);
     }
-  };
-
-  const getTokenForProvider = (jwtProvider: string) => {
-    const tokens =
-      JSON.parse(localStorage.getItem('OCI_PROVIDER_TOKENS') || '') || [];
-    const tokenObject = tokens.find(
-      (token: { provider: string }) =>
-        token.provider.toLowerCase() === jwtProvider.toLowerCase()
-    );
-    return tokenObject ? tokenObject.token : null;
   };
 
   const handleAttest = async () => {

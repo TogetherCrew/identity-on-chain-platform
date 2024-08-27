@@ -10,28 +10,43 @@ import {
   Paper,
   Box,
   Avatar,
+  CircularProgress,
 } from '@mui/material';
 import VerifiedIcon from '@mui/icons-material/Verified';
 import { FaDiscord, FaGoogle } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
+import {
+  DelegatedRevocationRequest,
+  EAS,
+} from '@ethereum-attestation-service/eas-sdk';
+import { Address } from 'viem';
+import { useAccount } from 'wagmi';
 import { useGetAttestations } from '../../services/eas/query';
 import { decodeAttestationData, IAttestation } from '../../libs/oci';
+import sepoliaChain from '../../utils/contracts/eas/sepoliaChain.json';
+import { useSigner } from '../../utils/eas-wagmi-utils';
+import { useRevokeIdentifierMutation } from '../../services/api/linking/query';
+import { AttestPayload } from '../../interfaces';
+import { convertStringsToBigInts } from '../../utils/helper';
 
 interface IdentifierItemProps {
   identifier: {
     name: string;
     icon: React.ElementType;
     verified: boolean;
+    uid: string;
   };
-  onRevoke: (name: string) => void;
+  onRevoke: (uid: string) => void;
   onConnect: (name: string) => void;
+  isLoading: boolean;
 }
 
 const IdentifierItem: React.FC<IdentifierItemProps> = ({
   identifier,
   onRevoke,
   onConnect,
+  isLoading,
 }) => (
   <Box mb={2}>
     <Paper elevation={1} className="rounded-xl py-2">
@@ -61,9 +76,11 @@ const IdentifierItem: React.FC<IdentifierItemProps> = ({
             <Button
               variant="outlined"
               color="error"
-              onClick={() => onRevoke(identifier.name)}
+              onClick={() => onRevoke(identifier.uid)}
+              disabled={isLoading}
+              startIcon={isLoading ? <CircularProgress size={16} /> : null}
             >
-              Revoke
+              {isLoading ? 'Revoking...' : 'Revoke'}
             </Button>
           ) : (
             <Button
@@ -81,25 +98,31 @@ const IdentifierItem: React.FC<IdentifierItemProps> = ({
 );
 
 export function Identifiers() {
+  const { chainId } = useAccount();
+  const signer = useSigner();
+
   const [identifiers, setIdentifiers] = useState([
     {
       name: 'Discord',
       icon: FaDiscord,
       verified: false,
+      uid: '',
     },
-    { name: 'Google', icon: FaGoogle, verified: false },
+    { name: 'Google', icon: FaGoogle, verified: false, uid: '' },
   ]);
 
   const [attestations, setAttestations] = useState<
-    (IAttestation & { provider?: string })[]
+    (IAttestation & { provider?: string; id?: string })[]
   >([]);
-  const { data: attestationsResponse } = useGetAttestations();
+  const { data: attestationsResponse, refetch } = useGetAttestations();
+
+  const { mutate: mutateRevokeIdentifier, data: revokeIdentifierResponse } =
+    useRevokeIdentifierMutation();
+
+  const [loadingIdentifier, setLoadingIdentifier] = useState<boolean>(false);
 
   useEffect(() => {
-    if (!attestationsResponse) {
-      console.error('No attestations found');
-      return;
-    }
+    if (!attestationsResponse) throw new Error('No attestations found');
 
     const attestationsData = attestationsResponse.map((attestation) => {
       const decodedData = decodeAttestationData(attestation.data);
@@ -130,6 +153,7 @@ export function Identifiers() {
       return {
         ...identifier,
         verified: !!matchingAttestation,
+        uid: matchingAttestation?.id || '',
       };
     });
 
@@ -138,9 +162,22 @@ export function Identifiers() {
 
   const navigate = useNavigate();
 
-  const handleRevoke = useCallback((identifier: string) => {
-    console.log(`Revoke attestation for ${identifier}`);
-  }, []);
+  const handleRevoke = useCallback(
+    (uid: string) => {
+      const siweJwt = localStorage.getItem('OCI_TOKEN');
+
+      if (!siweJwt) throw new Error('OCI SIWE token not found');
+
+      setLoadingIdentifier(true);
+
+      mutateRevokeIdentifier({
+        uid,
+        siweJwt,
+        chainId,
+      });
+    },
+    [mutateRevokeIdentifier, chainId]
+  );
 
   const handleConnect = useCallback(
     (identifier: string) => {
@@ -149,6 +186,50 @@ export function Identifiers() {
     },
     [navigate]
   );
+
+  useEffect(() => {
+    const revokeIdentifier = async () => {
+      if (revokeIdentifierResponse) {
+        console.log('Revoke identifier response', revokeIdentifierResponse);
+
+        const payload: AttestPayload = convertStringsToBigInts(
+          revokeIdentifierResponse.data
+        ) as AttestPayload;
+
+        console.log('Payload:', payload);
+
+        try {
+          const eas = new EAS(sepoliaChain.easContractAddress as Address);
+
+          if (!signer) throw new Error('Signer not found');
+
+          if (!revokeIdentifierResponse)
+            throw new Error('No linking identifier');
+
+          eas.connect(signer);
+
+          const transformedPayload: DelegatedRevocationRequest = {
+            schema: payload?.message?.schema,
+            data: {
+              uid: payload?.message?.uid,
+            },
+            signature: payload.signature,
+            revoker: payload.message.revoker,
+            deadline: 0n,
+          };
+
+          const tx = await eas.revokeByDelegation(transformedPayload);
+
+          await tx.wait();
+        } finally {
+          setLoadingIdentifier(false);
+          refetch();
+        }
+      }
+    };
+
+    revokeIdentifier();
+  }, [revokeIdentifierResponse, refetch, signer]);
 
   return (
     <div>
@@ -171,6 +252,7 @@ export function Identifiers() {
             identifier={identifier}
             onRevoke={handleRevoke}
             onConnect={handleConnect}
+            isLoading={loadingIdentifier}
           />
         ))}
       </List>
