@@ -14,10 +14,7 @@ import useSessionSigs from '../../hooks/useSessionSigs';
 import useLit from '../../hooks/LitProvider';
 import { useSigner } from '../../utils/eas-wagmi-utils';
 import { decryptAttestation, getAttestations } from '../../libs/oci';
-import CustomTable, {
-  AccessData,
-  Platform,
-} from '../../components/shared/CustomTable';
+import CustomTable from '../../components/shared/CustomTable';
 
 interface IProvider {
   uid: string;

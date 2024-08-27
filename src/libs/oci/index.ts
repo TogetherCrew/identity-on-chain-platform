@@ -1,13 +1,15 @@
-import { Address, parseAbiItem, WalletClient } from 'viem';
-import { SchemaEncoder } from '@ethereum-attestation-service/eas-sdk';
+import { Address, parseAbiItem } from 'viem';
+import {
+  SchemaDecodedItem,
+  SchemaEncoder,
+} from '@ethereum-attestation-service/eas-sdk';
 
+import * as LitJsSdk from '@lit-protocol/lit-node-client';
+import { EncryptToJsonPayload, SessionSigsMap } from '@lit-protocol/types';
 import { publicClient } from './client';
 import sepoliaChain from '../../utils/contracts/eas/sepoliaChain.json';
 
-import { LitNetwork } from '@lit-protocol/constants';
-import * as LitJsSdk from '@lit-protocol/lit-node-client';
-import { sepolia } from 'viem/chains';
-import { EncryptToJsonPayload, SessionSigsMap } from '@lit-protocol/types';
+import { SCHEMA_TYPES } from '../../utils/contracts/eas/constants';
 
 export interface IAttestation {
   uid: `0x${string}`;
@@ -76,9 +78,7 @@ export const hasActiveRevocationTime = (attestations: IAttestation[]) => {
 };
 
 export const getAttestationData = (attestation: IAttestation) => {
-  const schemaEncoder = new SchemaEncoder(
-    'bytes32 key, string provider, string secret'
-  );
+  const schemaEncoder = new SchemaEncoder(SCHEMA_TYPES);
 
   const decodedData = schemaEncoder.decodeData(attestation.data);
 
@@ -112,4 +112,9 @@ export const decryptAttestation = async (
   });
 
   return JSON.parse(decryptedData);
+};
+
+export const decodeAttestationData = (data: string): SchemaDecodedItem[] => {
+  const schemaEncoder = new SchemaEncoder(SCHEMA_TYPES);
+  return schemaEncoder.decodeData(data);
 };
