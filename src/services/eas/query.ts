@@ -2,9 +2,14 @@ import { useQuery } from '@tanstack/react-query';
 import { gql } from 'graphql-request';
 import { ATTESTER_ADDRESS, graphQLClient } from '.';
 import { EAS_SCHEMA_ID } from '../../utils/contracts/eas/constants';
+import { IAttestation } from '../../libs/oci';
+
+interface AttestationsResponse {
+  attestations: IAttestation[];
+}
 
 export const useGetAttestations = () => {
-  return useQuery({
+  return useQuery<IAttestation[]>({
     queryKey: ['getAttestations'],
     queryFn: async () => {
       const query = gql`
@@ -39,11 +44,12 @@ export const useGetAttestations = () => {
         schemaId: EAS_SCHEMA_ID,
       };
 
-      const attestedResults = await graphQLClient.request(query, variables);
+      const attestedResults = await graphQLClient.request<AttestationsResponse>(
+        query,
+        variables
+      );
 
-      console.log({ attestedResults });
-
-      return attestedResults;
+      return attestedResults.attestations;
     },
   });
 };

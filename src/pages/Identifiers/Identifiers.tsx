@@ -1,4 +1,4 @@
-/* eslint-disable react/no-array-index-key */
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   List,
   ListItem,
@@ -14,82 +14,141 @@ import {
 import VerifiedIcon from '@mui/icons-material/Verified';
 import { FaDiscord, FaGoogle } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-// import { useState } from 'react';
-// import { decryptAttestation, getAttestations } from '../../libs/oci';
-// import { useAccount } from 'wagmi';
-// import useLit from '../../hooks/LitProvider';
-// import useSessionSigs from '../../hooks/useSessionSigs';
-// import { useSigner } from '../../utils/eas-wagmi-utils';
-// import { GraphQLClient, gql } from 'graphql-request';
-// import { useQuery } from '@tanstack/react-query';
-// import {
-//   SchemaDecodedItem,
-//   SchemaEncoder,
-// } from '@ethereum-attestation-service/eas-sdk';
+import clsx from 'clsx';
 import { useGetAttestations } from '../../services/eas/query';
+import { decodeAttestationData, IAttestation } from '../../libs/oci';
 
-const identifiers = [
-  { name: 'Discord', icon: FaDiscord, verified: false, color: 'text-blue-500' },
-  { name: 'Google', icon: FaGoogle, verified: false, color: 'text-red-500' },
-];
+interface IdentifierItemProps {
+  identifier: {
+    name: string;
+    icon: React.ElementType;
+    verified: boolean;
+  };
+  onRevoke: (name: string) => void;
+  onConnect: (name: string) => void;
+}
+
+const IdentifierItem: React.FC<IdentifierItemProps> = ({
+  identifier,
+  onRevoke,
+  onConnect,
+}) => (
+  <Box mb={2}>
+    <Paper elevation={1} className="rounded-xl py-2">
+      <ListItem>
+        <Avatar>
+          <identifier.icon
+            size={28}
+            className={clsx({
+              'text-black': identifier.verified,
+              'text-white': !identifier.verified,
+            })}
+          />
+        </Avatar>
+        <ListItemText
+          primary={
+            <div className="flex items-center">
+              {identifier.verified && (
+                <VerifiedIcon sx={{ color: 'blue', mr: 2 }} />
+              )}
+              {identifier.name}
+            </div>
+          }
+          sx={{ ml: 2 }}
+        />
+        <ListItemSecondaryAction>
+          {identifier.verified ? (
+            <Button
+              variant="outlined"
+              color="error"
+              onClick={() => onRevoke(identifier.name)}
+            >
+              Revoke
+            </Button>
+          ) : (
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => onConnect(identifier.name)}
+            >
+              Connect
+            </Button>
+          )}
+        </ListItemSecondaryAction>
+      </ListItem>
+    </Paper>
+  </Box>
+);
 
 export function Identifiers() {
-  const { data } = useGetAttestations();
-  console.log({ data });
+  const [identifiers, setIdentifiers] = useState([
+    {
+      name: 'Discord',
+      icon: FaDiscord,
+      verified: false,
+    },
+    { name: 'Google', icon: FaGoogle, verified: false },
+  ]);
 
-  // const { litNodeClient } = useLit();
-  // const { chainId } = useAccount();
-  // const { sessionSigs, createSessionSigs } = useSessionSigs();
-  // const [decryptedData, setDecryptedData] = useState<any | null>(null);
+  const [attestations, setAttestations] = useState<
+    (IAttestation & { provider?: string })[]
+  >([]);
+  const { data: attestationsResponse } = useGetAttestations();
 
-  // const signer = useSigner();
-  // const { isConnected, address } = useAccount();
+  useEffect(() => {
+    if (!attestationsResponse) {
+      console.error('No attestations found');
+      return;
+    }
+
+    const attestationsData = attestationsResponse.map((attestation) => {
+      const decodedData = decodeAttestationData(attestation.data);
+
+      const providerData = decodedData.find((data) => data.name === 'provider');
+
+      return {
+        ...attestation,
+        provider:
+          typeof providerData?.value.value === 'string'
+            ? providerData.value.value
+            : undefined,
+        decodedData,
+      };
+    });
+
+    setAttestations(attestationsData);
+  }, [attestationsResponse]);
+
+  useEffect(() => {
+    const updatedIdentifiers = identifiers.map((identifier) => {
+      const matchingAttestation = attestations.find(
+        (attestation) =>
+          (attestation.provider as string)?.toLowerCase() ===
+          identifier.name.toLowerCase()
+      );
+
+      return {
+        ...identifier,
+        verified: !!matchingAttestation,
+      };
+    });
+
+    setIdentifiers(updatedIdentifiers);
+  }, [attestations]);
 
   const navigate = useNavigate();
 
-  const handleRevoke = (identifier: string) => {
+  const handleRevoke = useCallback((identifier: string) => {
     console.log(`Revoke attestation for ${identifier}`);
-  };
+  }, []);
 
-  const handleConnect = (identifier: string) => {
-    console.log(`Connect identifier for ${identifier}`);
-    navigate(`/identifiers/${identifier.toLowerCase()}/attestation`);
-  };
-
-  // const fetchAttestations = async () => {
-  //   if (!address) throw new Error('No address found');
-
-  //   const attestations = await getAttestations(address as `0x${string}`);
-  //   console.log({ attestations });
-
-  //   return attestations;
-  // };
-
-  // useEffect(() => {
-  //   if (isConnected && signer && chainId && litNodeClient) {
-  //     console.log(litNodeClient, 'litNodeClient');
-
-  //     createSessionSigs({ signer, chainId, litNodeClient });
-  //   }
-  // }, [signer, isConnected, litNodeClient, chainId, createSessionSigs]);
-
-  // useEffect(() => {
-  //   if (!sessionSigs) return;
-  //   const decrypt = async () => {
-  //     if (!sessionSigs) throw new Error('No sessionSigs found');
-
-  //     const attestations = await fetchAttestations();
-
-  //     const decryptedSecrets = await Promise.all(
-  //       attestations.map(async (attestation) => {
-  //         return decryptAttestation(litNodeClient, attestation, sessionSigs);
-  //       })
-  //     );
-  //     setDecryptedData(decryptedSecrets);
-  //   };
-
-  //   decrypt();
-  // }, [sessionSigs]);
+  const handleConnect = useCallback(
+    (identifier: string) => {
+      console.log(`Connect identifier for ${identifier}`);
+      navigate(`/identifiers/${identifier.toLowerCase()}/attestation`);
+    },
+    [navigate]
+  );
 
   return (
     <div>
@@ -100,55 +159,19 @@ export function Identifiers() {
         <ListItem>
           <ListItemText primary="Identifier" />
           <ListItemSecondaryAction>
-            <Typography variant="body2" style={{ marginRight: 40 }}>
+            <Typography variant="body2" sx={{ marginRight: 5 }}>
               Actions
             </Typography>
           </ListItemSecondaryAction>
         </ListItem>
         <Divider />
-        {identifiers.map((identifier, index) => (
-          <Box key={index} mb={2}>
-            <Paper elevation={1} className="rounded-xl py-2">
-              <ListItem>
-                <Avatar>
-                  <identifier.icon
-                    size={28}
-                    className={`${identifier.verified ? 'text-black' : 'text-white'}`}
-                  />
-                </Avatar>
-                <ListItemText
-                  primary={
-                    <div className="flex items-center">
-                      {identifier.verified && (
-                        <VerifiedIcon className="text-blue-400 mr-2" />
-                      )}
-                      {identifier.name}
-                    </div>
-                  }
-                  style={{ marginLeft: 16 }}
-                />
-                <ListItemSecondaryAction>
-                  {identifier.verified ? (
-                    <Button
-                      variant="outlined"
-                      color="error"
-                      onClick={() => handleRevoke(identifier.name)}
-                    >
-                      Revoke
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={() => handleConnect(identifier.name)}
-                    >
-                      Connect
-                    </Button>
-                  )}
-                </ListItemSecondaryAction>
-              </ListItem>
-            </Paper>
-          </Box>
+        {identifiers.map((identifier) => (
+          <IdentifierItem
+            key={identifier.name}
+            identifier={identifier}
+            onRevoke={handleRevoke}
+            onConnect={handleConnect}
+          />
         ))}
       </List>
     </div>
