@@ -1,16 +1,22 @@
-/* eslint-disable @typescript-eslint/no-shadow */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
+import CircularProgress from '@mui/material/CircularProgress';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import { Address } from 'viem';
-import { useWriteContract, useAccount } from 'wagmi';
+import { useAccount } from 'wagmi';
+import {
+  DelegatedAttestationRequest,
+  EAS,
+} from '@ethereum-attestation-service/eas-sdk';
 import StepperComponent from '../../../components/shared/CustomStepper';
 import { platformAuthentication } from '../../../services/api/auth';
 import { useLinkIdentifierMutation } from '../../../services/api/linking/query';
 import sepoliaChain from '../../../utils/contracts/eas/sepoliaChain.json';
+import { useSigner } from '../../../utils/eas-wagmi-utils';
+import { AttestPayload } from '../../../interfaces';
 
 const steps = [{ label: 'Auth' }, { label: 'Attest' }, { label: 'Transact' }];
 
@@ -20,7 +26,23 @@ type DecodedToken = { provider: Provider; iat: number; exp: number };
 
 export function Attestation() {
   const { isConnected, address } = useAccount();
-  const { writeContract, error } = useWriteContract();
+  const signer = useSigner();
+
+  const { providers } = useParams<{ providers: 'DISCORD' | 'GOOGLE' }>();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const {
+    mutate: mutateIdentifier,
+    data: linkingIdentifier,
+    isPending,
+  } = useLinkIdentifierMutation();
+
+  const [activeStep, setActiveStep] = useState(0);
+  const [linkingIdentifierRequest, setLinkingIdentifierRequest] =
+    useState<AttestPayload | null>(null);
+
+  const [isAuthorizing, setIsAuthorizing] = useState(false);
+  const [isAttesting, setIsAttesting] = useState(false);
 
   useEffect(() => {
     if (!isConnected) {
@@ -28,26 +50,37 @@ export function Attestation() {
     }
   }, [isConnected, address]);
 
-  const { provider } = useParams<{ provider: 'DISCORD' | 'GOOGLE' }>();
-  const location = useLocation();
-  const navigate = useNavigate();
-  const { mutate: mutateIdentifier, data: linkingIdentifier } =
-    useLinkIdentifierMutation();
-  const [activeStep, setActiveStep] = useState(0);
-  const [linkingIdentifierRequest, setLinkingIdentifierRequest] = useState({});
-
   const handleNext = () => {
     setActiveStep((prevActiveStep) =>
       Math.min(prevActiveStep + 1, steps.length - 1)
     );
   };
 
+  const convertStringsToBigInts = useCallback((obj: unknown): unknown => {
+    if (typeof obj === 'string' && /^[0-9]+$/.test(obj)) {
+      return BigInt(obj);
+    }
+    if (Array.isArray(obj)) {
+      return obj.map(convertStringsToBigInts);
+    }
+    if (typeof obj === 'object' && obj !== null) {
+      return Object.fromEntries(
+        Object.entries(obj).map(([k, v]) => [k, convertStringsToBigInts(v)])
+      );
+    }
+    return obj;
+  }, []);
+
   useEffect(() => {
     if (linkingIdentifier) {
-      setLinkingIdentifierRequest(linkingIdentifier.data);
+      const payload: AttestPayload = convertStringsToBigInts(
+        linkingIdentifier.data
+      ) as AttestPayload;
+
+      setLinkingIdentifierRequest(payload);
       handleNext();
     }
-  }, [linkingIdentifier]);
+  }, [convertStringsToBigInts, linkingIdentifier]);
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
@@ -84,9 +117,15 @@ export function Attestation() {
     }
   }, [location.search, location.pathname, navigate]);
 
-  const handleAuthorize = () => {
-    if (!provider) return;
-    platformAuthentication({ platformType: provider });
+  const handleAuthorize = async () => {
+    if (!providers) return;
+
+    setIsAuthorizing(true);
+    try {
+      await platformAuthentication({ platformType: providers });
+    } finally {
+      setIsAuthorizing(false);
+    }
   };
 
   const getTokenForProvider = (jwtProvider: string) => {
@@ -99,21 +138,52 @@ export function Attestation() {
     return tokenObject ? tokenObject.token : null;
   };
 
-  const handleAttest = () => {
-    writeContract({
-      abi: sepoliaChain.easContractAbi,
-      address: sepoliaChain.easContractAddress as Address,
-      functionName: 'attestByDelegation',
-      args: [linkingIdentifierRequest],
-    });
+  const handleAttest = async () => {
+    setIsAttesting(true);
+    try {
+      const eas = new EAS(sepoliaChain.easContractAddress as Address);
 
-    console.log({ error });
+      if (!signer) throw new Error('Signer not found');
+
+      if (!linkingIdentifierRequest) throw new Error('No linking identifier');
+
+      eas.connect(signer);
+
+      const transformedPayload: DelegatedAttestationRequest = {
+        schema: linkingIdentifierRequest?.message?.schema,
+        data: {
+          recipient: linkingIdentifierRequest.message.recipient,
+          expirationTime: linkingIdentifierRequest.message.expirationTime,
+          revocable: linkingIdentifierRequest.message.revocable,
+          refUID: linkingIdentifierRequest.message.refUID,
+          data: linkingIdentifierRequest.message.data,
+        },
+        signature: linkingIdentifierRequest.signature,
+        attester: linkingIdentifierRequest.message.attester,
+        deadline: 0n,
+      };
+      console.log({ transformedPayload });
+
+      const tx = await eas.attestByDelegation(transformedPayload);
+
+      console.log({ tx });
+
+      const newAttestationUID = await tx.wait();
+
+      console.log('New attestation UID:', newAttestationUID);
+
+      console.log('Transaction receipt:', tx.receipt);
+    } finally {
+      setIsAttesting(false);
+    }
   };
 
   const handleLinkIdentifier = async () => {
     const siweJwt = localStorage.getItem('OCI_TOKEN');
-    if (!siweJwt || !provider) return;
-    const anyJwt = getTokenForProvider(provider);
+    if (!siweJwt || !providers) return;
+
+    const anyJwt = getTokenForProvider(providers);
+
     mutateIdentifier({
       siweJwt,
       anyJwt,
@@ -137,15 +207,20 @@ export function Attestation() {
               Let’s get started!
             </Typography>
             <Typography variant="body1" color="GrayText">
-              Please sign in with {provider}.
+              Please sign in with {providers}.
             </Typography>
             <Button
               variant="contained"
               color="primary"
               onClick={handleAuthorize}
               className="mt-2"
+              disabled={isAuthorizing}
             >
-              Sign in with {provider}
+              {isAuthorizing ? (
+                <CircularProgress size={24} color="inherit" />
+              ) : (
+                `Sign in with ${providers}`
+              )}
             </Button>
           </div>
         )}
@@ -155,7 +230,7 @@ export function Attestation() {
               Generate an attestation.
             </Typography>
             <Typography variant="body1" color="GrayText">
-              An attestation is a proof that links your {provider} account to
+              An attestation is a proof that links your {providers} account to
               your wallet address.
             </Typography>
             <Button
@@ -163,8 +238,13 @@ export function Attestation() {
               color="primary"
               onClick={handleLinkIdentifier}
               className="mt-2"
+              disabled={isPending}
             >
-              Create attestation
+              {isPending ? (
+                <CircularProgress size={24} color="inherit" />
+              ) : (
+                'Create attestation'
+              )}
             </Button>
           </div>
         )}
@@ -181,8 +261,13 @@ export function Attestation() {
               color="primary"
               onClick={handleAttest}
               className="mt-2"
+              disabled={isAttesting}
             >
-              Sign Transaction
+              {isAttesting ? (
+                <CircularProgress size={24} color="inherit" />
+              ) : (
+                'Sign Transaction'
+              )}
             </Button>
             <Typography variant="body2" color="GrayText" className="mt-2">
               This will cost a small amount of gas.

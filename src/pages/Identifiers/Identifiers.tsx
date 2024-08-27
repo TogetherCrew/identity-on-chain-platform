@@ -1,3 +1,4 @@
+/* eslint-disable react/no-array-index-key */
 import {
   List,
   ListItem,
@@ -13,6 +14,20 @@ import {
 import VerifiedIcon from '@mui/icons-material/Verified';
 import { FaDiscord, FaGoogle } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import {
+  decryptAttestation,
+  getAttestation,
+  getAttestationIds,
+  getAttestations,
+  getAttestationsData,
+  hasActiveRevocationTime,
+  IAttestation,
+} from '../../libs/oci';
+import { useAccount } from 'wagmi';
+import useLit from '../../hooks/LitProvider';
+import useSessionSigs from '../../hooks/useSessionSigs';
+import { useSigner } from '../../utils/eas-wagmi-utils';
 
 const identifiers = [
   { name: 'Discord', icon: FaDiscord, verified: false, color: 'text-blue-500' },
@@ -20,6 +35,13 @@ const identifiers = [
 ];
 
 export function Identifiers() {
+  const { litNodeClient } = useLit();
+  const { chainId } = useAccount();
+  const { sessionSigs, createSessionSigs } = useSessionSigs();
+  const [decryptedData, setDecryptedData] = useState<any | null>(null);
+
+  const signer = useSigner();
+  const { isConnected, address } = useAccount();
   const navigate = useNavigate();
 
   const handleRevoke = (identifier: string) => {
@@ -30,6 +52,41 @@ export function Identifiers() {
     console.log(`Connect identifier for ${identifier}`);
     navigate(`/identifiers/${identifier.toLowerCase()}/attestation`);
   };
+
+  const fetchAttestations = async () => {
+    if (!address) throw new Error('No address found');
+
+    const attestations = await getAttestations(address as `0x${string}`);
+    console.log({ attestations });
+
+    return attestations;
+  };
+
+  useEffect(() => {
+    if (isConnected && signer && chainId && litNodeClient) {
+      console.log(litNodeClient, 'litNodeClient');
+
+      createSessionSigs({ signer, chainId, litNodeClient });
+    }
+  }, [signer, isConnected, litNodeClient, chainId, createSessionSigs]);
+
+  useEffect(() => {
+    if (!sessionSigs) return;
+    const decrypt = async () => {
+      if (!sessionSigs) throw new Error('No sessionSigs found');
+
+      const attestations = await fetchAttestations();
+
+      const decryptedSecrets = Promise.all(
+        attestations.map(async (attestation) => {
+          return decryptAttestation(litNodeClient, attestation, sessionSigs);
+        })
+      );
+      setDecryptedData(decryptedSecrets);
+    };
+
+    decrypt();
+  }, [sessionSigs]);
 
   return (
     <div>
@@ -60,7 +117,7 @@ export function Identifiers() {
                   primary={
                     <div className="flex items-center">
                       {identifier.verified && (
-                        <VerifiedIcon className={'text-blue-400 mr-2'} />
+                        <VerifiedIcon className="text-blue-400 mr-2" />
                       )}
                       {identifier.name}
                     </div>
