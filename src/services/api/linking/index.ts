@@ -11,5 +11,9 @@ export const linkIdentifier = async ({
   anyJwt,
   chainId = 11155111,
 }: LinkIdentifierParams) => {
-  return api.post('/linking/link-identities', { siweJwt, anyJwt, chainId });
+  return api.post('/eas/sign-delegated-attestation', {
+    siweJwt,
+    anyJwt,
+    chainId,
+  });
 };
