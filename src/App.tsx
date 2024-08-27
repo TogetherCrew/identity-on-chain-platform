@@ -16,6 +16,7 @@ import {
 import { sepolia } from 'wagmi/chains';
 import { getAddress } from 'viem';
 import { createSiweMessage } from 'viem/siwe';
+import { LitNetwork } from '@lit-protocol/constants';
 import Login from './pages/Auth/Login';
 import theme from './libs/theme';
 import { api } from './services/api';
@@ -28,6 +29,7 @@ import Permissions from './pages/Permissions';
 import Attestation from './pages/Identifiers/Attestation';
 import Callback from './pages/Callback';
 import ProtectedRoute from './ProtectedRoute';
+import { LitProvider } from './hooks/LitProvider';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -108,51 +110,55 @@ const App: React.FC = () => {
     console.log('authStatus', authStatus);
   }, [authStatus]);
 
+  globalThis.Buffer = Buffer;
+
   return (
     <BrowserRouter>
-      <WagmiProvider config={config}>
-        <QueryClientProvider client={queryClient}>
-          <RainbowKitAuthenticationProvider
-            adapter={authenticationAdapter}
-            status={authStatus}
-          >
-            <RainbowKitProvider initialChain={sepolia}>
-              <ThemeProvider theme={theme}>
-                <CssBaseline />
-                <Routes>
-                  <Route
-                    path="/auth/login"
-                    element={
-                      authStatus === 'authenticated' ? (
-                        <Navigate to="/" replace />
-                      ) : (
-                        <Login />
-                      )
-                    }
-                  />
-                  <Route
-                    element={
-                      <ProtectedRoute>
-                        <DefaultLayout />
-                      </ProtectedRoute>
-                    }
-                  >
-                    <Route path="/" element={<Dashboard />} />
-                    <Route path="/identifiers" element={<Identifiers />} />
+      <LitProvider litNetwork={LitNetwork.DatilDev}>
+        <WagmiProvider config={config}>
+          <QueryClientProvider client={queryClient}>
+            <RainbowKitAuthenticationProvider
+              adapter={authenticationAdapter}
+              status={authStatus}
+            >
+              <RainbowKitProvider initialChain={sepolia}>
+                <ThemeProvider theme={theme}>
+                  <CssBaseline />
+                  <Routes>
                     <Route
-                      path="identifiers/:provider/attestation"
-                      element={<Attestation />}
+                      path="/auth/login"
+                      element={
+                        authStatus === 'authenticated' ? (
+                          <Navigate to="/" replace />
+                        ) : (
+                          <Login />
+                        )
+                      }
                     />
-                    <Route path="/permissions" element={<Permissions />} />
-                  </Route>
-                  <Route path="/callback" element={<Callback />} />
-                  <Route path="*" element={<div>Not found</div>} />
-                </Routes>
-              </ThemeProvider>
-            </RainbowKitProvider>
-          </RainbowKitAuthenticationProvider>
-        </QueryClientProvider>
-      </WagmiProvider>
+                    <Route
+                      element={
+                        <ProtectedRoute>
+                          <DefaultLayout />
+                        </ProtectedRoute>
+                      }
+                    >
+                      <Route path="/" element={<Dashboard />} />
+                      <Route path="/identifiers" element={<Identifiers />} />
+                      <Route
+                        path="identifiers/:providers/attestation"
+                        element={<Attestation />}
+                      />
+                      <Route path="/permissions" element={<Permissions />} />
+                    </Route>
+                    <Route path="/callback" element={<Callback />} />
+                    <Route path="*" element={<div>Not found</div>} />
+                  </Routes>
+                </ThemeProvider>
+              </RainbowKitProvider>
+            </RainbowKitAuthenticationProvider>
+          </QueryClientProvider>
+        </WagmiProvider>
+      </LitProvider>
     </BrowserRouter>
   );
 };
