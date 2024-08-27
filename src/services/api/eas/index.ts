@@ -12,6 +12,12 @@ export interface RevokeIdentifierParams {
   chainId?: number;
 }
 
+export interface DecryptAttestationsSecretParams {
+  uid: string;
+  siweJwt: string;
+  chainId?: number;
+}
+
 export const linkIdentifier = async ({
   siweJwt,
   anyJwt,
@@ -30,6 +36,17 @@ export const revokeIdentifier = async ({
   chainId,
 }: RevokeIdentifierParams) => {
   return api.post(`/eas/${uid}/sign-delegated-revocation`, {
+    siweJwt,
+    chainId,
+  });
+};
+
+export const decryptAttestationsSecret = async ({
+  uid,
+  siweJwt,
+  chainId,
+}: DecryptAttestationsSecretParams) => {
+  return api.post(`/eas/${uid}/decrypt-attestation-secret`, {
     siweJwt,
     chainId,
   });

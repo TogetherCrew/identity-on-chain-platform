@@ -11,8 +11,11 @@ import {
   Box,
   Avatar,
   CircularProgress,
+  IconButton,
 } from '@mui/material';
 import VerifiedIcon from '@mui/icons-material/Verified';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { FaDiscord, FaGoogle } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
@@ -26,8 +29,11 @@ import { useGetAttestations } from '../../services/eas/query';
 import { decodeAttestationData, IAttestation } from '../../libs/oci';
 import sepoliaChain from '../../utils/contracts/eas/sepoliaChain.json';
 import { useSigner } from '../../utils/eas-wagmi-utils';
-import { useRevokeIdentifierMutation } from '../../services/api/linking/query';
-import { AttestPayload } from '../../interfaces';
+import {
+  useDecryptAttestationsSecretMutation,
+  useRevokeIdentifierMutation,
+} from '../../services/api/eas/query';
+import { RevokePayload } from '../../interfaces';
 import { convertStringsToBigInts } from '../../utils/helper';
 
 interface IdentifierItemProps {
@@ -40,6 +46,9 @@ interface IdentifierItemProps {
   onRevoke: (uid: string) => void;
   onConnect: (name: string) => void;
   isLoading: boolean;
+  isRevealedPending: boolean;
+  isRevealed: string;
+  onReveal: () => void;
 }
 
 const IdentifierItem: React.FC<IdentifierItemProps> = ({
@@ -47,6 +56,9 @@ const IdentifierItem: React.FC<IdentifierItemProps> = ({
   onRevoke,
   onConnect,
   isLoading,
+  isRevealedPending,
+  isRevealed,
+  onReveal,
 }) => (
   <Box mb={2}>
     <Paper elevation={1} className="rounded-xl py-2">
@@ -64,9 +76,25 @@ const IdentifierItem: React.FC<IdentifierItemProps> = ({
           primary={
             <div className="flex items-center">
               {identifier.verified && (
-                <VerifiedIcon sx={{ color: 'blue', mr: 2 }} />
+                <VerifiedIcon sx={{ color: 'blue', mr: 1 }} />
               )}
-              {identifier.name}
+              <Typography>{identifier.name}</Typography>
+              <div className="ml-3">
+                {isRevealedPending ? (
+                  <CircularProgress size={24} />
+                ) : (
+                  <>
+                    {isRevealed !== '*********' ? isRevealed : '*********'}
+                    <IconButton onClick={onReveal} sx={{ ml: 1 }}>
+                      {isRevealed !== '*********' ? (
+                        <VisibilityOffIcon />
+                      ) : (
+                        <VisibilityIcon />
+                      )}
+                    </IconButton>
+                  </>
+                )}
+              </div>
             </div>
           }
           sx={{ ml: 2 }}
@@ -119,27 +147,46 @@ export function Identifiers() {
   const { mutate: mutateRevokeIdentifier, data: revokeIdentifierResponse } =
     useRevokeIdentifierMutation();
 
-  const [loadingIdentifier, setLoadingIdentifier] = useState<boolean>(false);
+  const { mutate: mutateDecryptAttestationsSecret } =
+    useDecryptAttestationsSecretMutation();
+
+  const [loadingIdentifiers, setLoadingIdentifiers] = useState<{
+    [uid: string]: boolean;
+  }>({});
+
+  const [revealedIdentifiers, setRevealedIdentifiers] = useState<{
+    [uid: string]: string;
+  }>({});
+
+  const [revealing, setRevealing] = useState<{ [uid: string]: boolean }>({});
 
   useEffect(() => {
-    if (!attestationsResponse) throw new Error('No attestations found');
+    const processAttestations = () => {
+      if (!attestationsResponse) {
+        return;
+      }
 
-    const attestationsData = attestationsResponse.map((attestation) => {
-      const decodedData = decodeAttestationData(attestation.data);
+      const attestationsData = attestationsResponse.map((attestation) => {
+        const decodedData = decodeAttestationData(attestation.data);
 
-      const providerData = decodedData.find((data) => data.name === 'provider');
+        const providerData = decodedData.find(
+          (data) => data.name === 'provider'
+        );
 
-      return {
-        ...attestation,
-        provider:
-          typeof providerData?.value.value === 'string'
-            ? providerData.value.value
-            : undefined,
-        decodedData,
-      };
-    });
+        return {
+          ...attestation,
+          provider:
+            typeof providerData?.value.value === 'string'
+              ? providerData.value.value
+              : undefined,
+          decodedData,
+        };
+      });
 
-    setAttestations(attestationsData);
+      setAttestations(attestationsData);
+    };
+
+    processAttestations();
   }, [attestationsResponse]);
 
   useEffect(() => {
@@ -158,6 +205,16 @@ export function Identifiers() {
     });
 
     setIdentifiers(updatedIdentifiers);
+
+    const initialRevealedState = updatedIdentifiers.reduce(
+      (acc, identifier) => {
+        acc[identifier.uid] = '*********';
+        return acc;
+      },
+      {} as { [uid: string]: string }
+    );
+
+    setRevealedIdentifiers(initialRevealedState);
   }, [attestations]);
 
   const navigate = useNavigate();
@@ -168,7 +225,7 @@ export function Identifiers() {
 
       if (!siweJwt) throw new Error('OCI SIWE token not found');
 
-      setLoadingIdentifier(true);
+      setLoadingIdentifiers((prev) => ({ ...prev, [uid]: true }));
 
       mutateRevokeIdentifier({
         uid,
@@ -181,10 +238,61 @@ export function Identifiers() {
 
   const handleConnect = useCallback(
     (identifier: string) => {
-      console.log(`Connect identifier for ${identifier}`);
       navigate(`/identifiers/${identifier.toLowerCase()}/attestation`);
     },
     [navigate]
+  );
+
+  const handleReveal = useCallback(
+    (uid: string) => {
+      // Toggle between showing and hiding the identifier
+      if (revealedIdentifiers[uid] !== '*********') {
+        setRevealedIdentifiers((prev) => ({
+          ...prev,
+          [uid]: '*********',
+        }));
+        return;
+      }
+
+      setRevealing((prev) => ({
+        ...prev,
+        [uid]: true,
+      }));
+
+      const siweJwt = localStorage.getItem('OCI_TOKEN');
+
+      if (!siweJwt) throw new Error('OCI SIWE token not found');
+
+      mutateDecryptAttestationsSecret(
+        {
+          uid,
+          siweJwt,
+          chainId,
+        },
+        {
+          onSuccess: (response) => {
+            console.log('Decrypted secret:', response);
+
+            setRevealedIdentifiers((prev) => ({
+              ...prev,
+              [uid]: response.data.id,
+            }));
+            setRevealing((prev) => ({
+              ...prev,
+              [uid]: false,
+            }));
+          },
+          onError: (error) => {
+            console.error('Error decrypting secret:', error);
+            setRevealing((prev) => ({
+              ...prev,
+              [uid]: false,
+            }));
+          },
+        }
+      );
+    },
+    [chainId, mutateDecryptAttestationsSecret, revealedIdentifiers]
   );
 
   useEffect(() => {
@@ -192,9 +300,9 @@ export function Identifiers() {
       if (revokeIdentifierResponse) {
         console.log('Revoke identifier response', revokeIdentifierResponse);
 
-        const payload: AttestPayload = convertStringsToBigInts(
+        const payload: RevokePayload = convertStringsToBigInts(
           revokeIdentifierResponse.data
-        ) as AttestPayload;
+        ) as RevokePayload;
 
         console.log('Payload:', payload);
 
@@ -208,28 +316,45 @@ export function Identifiers() {
 
           eas.connect(signer);
 
-          const transformedPayload: DelegatedRevocationRequest = {
-            schema: payload?.message?.schema,
-            data: {
-              uid: payload?.message?.uid,
-            },
-            signature: payload.signature,
-            revoker: payload.message.revoker,
-            deadline: 0n,
-          };
+          if ('revoker' in payload.message) {
+            const transformedPayload: DelegatedRevocationRequest = {
+              schema: payload.message.schema,
+              data: {
+                uid: payload.message.uid,
+              },
+              signature: payload.signature,
+              revoker: payload.message.revoker,
+              deadline: 0n,
+            };
 
-          const tx = await eas.revokeByDelegation(transformedPayload);
+            const tx = await eas.revokeByDelegation(transformedPayload);
 
-          await tx.wait();
+            await tx.wait();
+
+            setLoadingIdentifiers((prev) => ({
+              ...prev,
+              [payload.message.uid]: false,
+            }));
+          } else {
+            throw new Error('Invalid message type for revocation');
+          }
+        } catch (error) {
+          console.error('Error during revocation:', error);
+
+          if ('uid' in payload.message) {
+            setLoadingIdentifiers((prev) => ({
+              ...prev,
+              [payload.message.uid]: false,
+            }));
+          }
         } finally {
-          setLoadingIdentifier(false);
           refetch();
         }
       }
     };
 
     revokeIdentifier();
-  }, [revokeIdentifierResponse, refetch, signer]);
+  }, [revokeIdentifierResponse]);
 
   return (
     <div>
@@ -252,7 +377,10 @@ export function Identifiers() {
             identifier={identifier}
             onRevoke={handleRevoke}
             onConnect={handleConnect}
-            isLoading={loadingIdentifier}
+            isLoading={loadingIdentifiers[identifier.uid] || false}
+            isRevealedPending={revealing[identifier.uid] || false}
+            isRevealed={revealedIdentifiers[identifier.uid] || '*********'}
+            onReveal={() => handleReveal(identifier.uid)}
           />
         ))}
       </List>
