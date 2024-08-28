@@ -1,175 +1,172 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import {
-  useAccount,
-  useReadContract,
-  useReadContracts,
-  useWriteContract,
-} from 'wagmi';
-import { Abi, Address } from 'viem';
-import { useEffect, useState } from 'react';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useEffect, useMemo, useState } from 'react';
+import { useReadContract, useReadContracts, useWriteContract } from 'wagmi';
+import { Address, Abi } from 'viem';
+import { Backdrop, CircularProgress, Stack, Typography } from '@mui/material';
+import { useGetAttestations } from '../../services/eas/query';
 import sepoliaChainAppConctract from '../../utils/contracts/app/sepoliaChain.json';
 import sepoliaChainOidonctract from '../../utils/contracts/oid/sepoliaChain.json';
-import useSessionSigs from '../../hooks/useSessionSigs';
-import useLit from '../../hooks/LitProvider';
-import { useSigner } from '../../utils/eas-wagmi-utils';
-import { decryptAttestation, getAttestations } from '../../libs/oci';
-import CustomTable from '../../components/shared/CustomTable';
-
-interface IProvider {
-  uid: string;
-  provider: string;
-  id: string;
-}
+import { decodeAttestationData, IAttestation } from '../../libs/oci';
+import CustomTable, {
+  Platform,
+  AccessData,
+} from '../../components/shared/CustomTable';
 
 export function Permissions() {
-  const signer = useSigner();
-  const { litNodeClient } = useLit();
-  const { sessionSigs, createSessionSigs } = useSessionSigs();
+  const { writeContract, isPending: isWriting } = useWriteContract();
+  const { data: attestationsResponse, isLoading: isLoadingAttestations } =
+    useGetAttestations();
+  const [applicationsArgs] = useState<[number, number]>([0, 10]);
+  const [attestations, setAttestations] = useState<
+    (IAttestation & { provider?: string; id?: string })[]
+  >([]);
+  const [permissionsWithUidsAndApps, setPermissionsWithUidsAndApps] = useState<
+    AccessData[]
+  >([]);
 
-  const { isConnected, address, chainId } = useAccount();
-  const [applicationsArgs, setApplicationsArgs] = useState<[number, number]>([
-    0, 10,
-  ]);
-  const { writeContract } = useWriteContract();
-
-  const [providers, setProviders] = useState<IProvider[]>([]);
-  const [uids, setUids] = useState<string[]>([]);
-
-  const { data: applications } = useReadContract({
-    abi: sepoliaChainAppConctract.appContractABI,
-    address: sepoliaChainAppConctract.appContractAddress as Address,
-    functionName: 'getApplications',
-    args: applicationsArgs,
-  });
+  const { data: applications, isLoading: isLoadingApplications } =
+    useReadContract({
+      abi: sepoliaChainAppConctract.appContractABI,
+      address: sepoliaChainAppConctract.appContractAddress as Address,
+      functionName: 'getApplications',
+      args: applicationsArgs,
+    });
 
   useEffect(() => {
-    if (!isConnected) throw new Error('Wallet not connected');
-  }, [isConnected, applications]);
+    const processAttestations = () => {
+      if (!attestationsResponse) {
+        return;
+      }
 
-  const contractCalls = uids.flatMap((uid) =>
-    applications.map((application) => ({
-      abi: sepoliaChainOidonctract.oidContractAbi as Abi,
-      address: sepoliaChainOidonctract.oidContractAddress as Address,
-      functionName: 'hasPermission',
-      args: [uid, application.account],
-    }))
-  );
+      const attestationsData = attestationsResponse.map((attestation) => {
+        const decodedData = decodeAttestationData(attestation.data);
 
-  const { data: hasPermissionsOnApp } = useReadContracts({
-    contracts: contractCalls,
-  });
-
-  console.log({ hasPermissionsOnApp });
-
-  const permissionsWithUidsAndApps =
-    hasPermissionsOnApp
-      ?.map((permissionResult, index) => {
-        const uidIndex = Math.floor(index / applications.length);
-        const appIndex = index % applications.length;
-
-        if (!permissionResult || typeof permissionResult.result !== 'boolean') {
-          console.error(
-            `Unexpected result format for UID: ${uids[uidIndex]} and account: ${applications[appIndex].account}`,
-            permissionResult
-          );
-          return null;
-        }
+        const providerData = decodedData.find(
+          (data) => data.name === 'provider'
+        );
 
         return {
-          uid: uids[uidIndex],
-          account: applications[appIndex].account,
-          applicationName: applications[appIndex].name,
-          hasPermission: permissionResult.result as boolean,
+          ...attestation,
+          provider:
+            typeof providerData?.value.value === 'string'
+              ? providerData.value.value
+              : undefined,
+          decodedData,
         };
-      })
-      .filter(Boolean) || [];
+      });
 
-  console.log({ permissionsWithUidsAndApps });
-
-  // const { data: hasPermission } = useReadContract({
-  //   abi: sepoliaChainOidonctract.oidContractAbi,
-  //   address: sepoliaChainOidonctract.oidContractAddress as Address,
-  //   functionName: 'hasPermission',
-  //   args: [uid, account],
-  // });
-
-  // useEffect(() => {
-  //   if (!isConnected) throw new Error('Wallet not connected');
-
-  //   console.log({ hasPermission });
-  // }, [hasPermission]);
-
-  useEffect(() => {
-    if (isConnected && signer && chainId && litNodeClient) {
-      createSessionSigs({ signer, chainId, litNodeClient });
-    }
-  }, [signer, isConnected, litNodeClient, chainId, createSessionSigs]);
-
-  const fetchAttestations = async () => {
-    if (!address) throw new Error('No address found');
-
-    const attestations = await getAttestations(address as `0x${string}`);
-
-    const filteredUids = attestations
-      .filter((attestation) => attestation.revocationTime === 0n)
-      .map((attestation) => attestation.uid);
-
-    setUids(filteredUids);
-
-    return attestations.filter(
-      (attestation) => attestation.revocationTime === 0n
-    );
-  };
-
-  useEffect(() => {
-    const decrypt = async () => {
-      try {
-        if (!sessionSigs || !litNodeClient)
-          throw new Error('No sessionSigs found');
-
-        const attestations = await fetchAttestations();
-
-        const decryptedProviders = (await Promise.all(
-          attestations.map((attestation) =>
-            decryptAttestation(litNodeClient, attestation, sessionSigs)
-              .then((result) => ({
-                ...result,
-                uid: attestation.uid,
-              }))
-              .catch(() => null)
-          )
-        ).then((results) =>
-          results.filter((value) => value !== null)
-        )) as IProvider[];
-
-        setProviders(decryptedProviders);
-      } catch (e) {
-        console.log(e);
-      }
+      setAttestations(attestationsData);
     };
 
-    decrypt();
-  }, [sessionSigs, litNodeClient]);
+    processAttestations();
+  }, [attestationsResponse]);
 
-  console.log({ providers });
+  const contractCalls = useMemo(
+    () =>
+      attestations.flatMap(
+        (attestation) =>
+          applications?.map((application) => ({
+            abi: sepoliaChainOidonctract.oidContractAbi as Abi,
+            address: sepoliaChainOidonctract.oidContractAddress as Address,
+            functionName: 'hasPermission',
+            args: [attestation.id, application.account],
+          })) || []
+      ),
+    [attestations, applications]
+  );
+
+  const { data: hasPermissionsOnApp, isLoading: isLoadingPermissions } =
+    useReadContracts({
+      contracts: contractCalls,
+    });
+
+  useEffect(() => {
+    if (hasPermissionsOnApp) {
+      const uids = attestations.map((attestation) => attestation.id);
+
+      const permissions =
+        hasPermissionsOnApp
+          ?.map((permissionResult, index) => {
+            const uidIndex = Math.floor(index / applications.length);
+            const appIndex = index % applications.length;
+
+            if (
+              !permissionResult ||
+              typeof permissionResult.result !== 'boolean'
+            ) {
+              console.error(
+                `Unexpected result format for UID: ${uids[uidIndex]} and account: ${applications[appIndex].account}`,
+                permissionResult
+              );
+              return null;
+            }
+
+            return {
+              uid: uids[uidIndex],
+              account: applications[appIndex].account,
+              applicationName: applications[appIndex].name,
+              hasPermission: permissionResult.result as boolean,
+            };
+          })
+          .filter(Boolean) || [];
+
+      setPermissionsWithUidsAndApps(permissions);
+    }
+  }, [hasPermissionsOnApp, attestations, applications]);
+
+  const providers: Platform[] = attestations.map((attestation) => ({
+    id: attestation.id,
+    provider: attestation.provider || 'Unknown',
+    uid: attestation.id,
+  }));
+
+  const handleGrantOrRevokeAccess = (application: any, platform: any) => {
+    writeContract({
+      abi: sepoliaChainOidonctract.oidContractAbi as Abi,
+      address: sepoliaChainOidonctract.oidContractAddress as Address,
+      functionName: application.hasPermission
+        ? 'revokePermission'
+        : 'grantPermission',
+      args: [platform.uid, application.account],
+    });
+  };
+
+  const isLoading =
+    isWriting ||
+    isLoadingAttestations ||
+    isLoadingApplications ||
+    isLoadingPermissions;
 
   return (
     <div>
-      <div>Permissions</div>
+      <Backdrop
+        open={isLoading}
+        sx={{
+          zIndex: (theme) => theme.zIndex.drawer + 1,
+          background: '#fff',
+          color: 'black',
+        }}
+      >
+        <Stack
+          sx={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+          }}
+        >
+          <CircularProgress color="inherit" />
+          <Typography variant="h6" gutterBottom style={{ marginLeft: '15px' }}>
+            Loading...
+          </Typography>
+        </Stack>
+      </Backdrop>
+      <Typography variant="h6" gutterBottom>
+        Permissions
+      </Typography>
       <CustomTable
         xcolumns={providers}
         ycolumns={permissionsWithUidsAndApps}
-        handleGrantOrRevokeAccess={(application, platform) => {
-          writeContract({
-            abi: sepoliaChainOidonctract.oidContractAbi as Abi,
-            address: sepoliaChainOidonctract.oidContractAddress as Address,
-            functionName: application.hasPermission
-              ? 'revokePermission'
-              : 'grantPermission',
-            args: [platform.uid, application.account],
-          });
-        }}
+        handleGrantOrRevokeAccess={handleGrantOrRevokeAccess}
       />
     </div>
   );

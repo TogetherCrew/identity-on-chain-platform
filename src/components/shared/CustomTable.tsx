@@ -35,9 +35,6 @@ const CustomTable: React.FC<CustomTableProps<AccessData>> = ({
   ycolumns,
   handleGrantOrRevokeAccess,
 }) => {
-  console.log('xcolumns:', xcolumns);
-  console.log('ycolumns:', ycolumns);
-
   const groupedApplications = ycolumns.reduce(
     (acc, application) => {
       if (!acc[application.applicationName]) {
@@ -89,12 +86,16 @@ const CustomTable: React.FC<CustomTableProps<AccessData>> = ({
                   );
                   return (
                     <TableCell key={colIndex} align="center">
-                      <AccessControlButton
-                        hasAccess={application?.hasPermission || false}
-                        onToggleAccess={() =>
-                          handleToggleAccess(application!, platform)
-                        }
-                      />
+                      {application ? (
+                        <AccessControlButton
+                          hasAccess={application.hasPermission}
+                          onToggleAccess={() =>
+                            handleToggleAccess(application, platform)
+                          }
+                        />
+                      ) : (
+                        <Typography variant="body2">No Data</Typography>
+                      )}
                     </TableCell>
                   );
                 })}
