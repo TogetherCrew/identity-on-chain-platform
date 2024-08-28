@@ -24,13 +24,17 @@ export function Permissions() {
     AccessData[]
   >([]);
 
-  const { data: applications, isLoading: isLoadingApplications } =
-    useReadContract({
-      abi: sepoliaChainAppConctract.appContractABI,
-      address: sepoliaChainAppConctract.appContractAddress as Address,
-      functionName: 'getApplications',
-      args: applicationsArgs,
-    });
+  const { data, isLoading: isLoadingApplications } = useReadContract({
+    abi: sepoliaChainAppConctract.appContractABI,
+    address: sepoliaChainAppConctract.appContractAddress as Address,
+    functionName: 'getApplications',
+    args: applicationsArgs,
+  });
+
+  const applications = useMemo(
+    () => (data as { name: string; account: string }[]) || [],
+    [data]
+  );
 
   useEffect(() => {
     const processAttestations = () => {
@@ -42,7 +46,7 @@ export function Permissions() {
         const decodedData = decodeAttestationData(attestation.data);
 
         const providerData = decodedData.find(
-          (data) => data.name === 'provider'
+          (provider) => provider.name === 'provider'
         );
 
         return {
@@ -110,14 +114,18 @@ export function Permissions() {
           })
           .filter(Boolean) || [];
 
-      setPermissionsWithUidsAndApps(permissions);
+      setPermissionsWithUidsAndApps(
+        permissions.filter(
+          (permission): permission is AccessData => permission !== null
+        )
+      );
     }
   }, [hasPermissionsOnApp, attestations, applications]);
 
   const providers: Platform[] = attestations.map((attestation) => ({
-    id: attestation.id,
+    id: attestation.id || '',
     provider: attestation.provider || 'Unknown',
-    uid: attestation.id,
+    uid: attestation.id || '',
   }));
 
   const handleGrantOrRevokeAccess = (application: any, platform: any) => {
