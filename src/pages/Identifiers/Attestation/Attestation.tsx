@@ -138,7 +138,7 @@ export function Attestation() {
           data: linkingIdentifierRequest.message.data,
         },
         signature: linkingIdentifierRequest.signature,
-        attester: linkingIdentifierRequest.message.attester,
+        attester: linkingIdentifierRequest.message.attester as string,
         deadline: 0n,
       };
       console.log({ transformedPayload });
