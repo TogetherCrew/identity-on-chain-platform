@@ -30,6 +30,7 @@ import Attestation from './pages/Identifiers/Attestation';
 import Callback from './pages/Callback';
 import ProtectedRoute from './ProtectedRoute';
 import { LitProvider } from './hooks/LitProvider';
+import { CustomSnackbar } from './components/shared/CustomSnackbar';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -153,6 +154,7 @@ const App: React.FC = () => {
                     <Route path="/callback" element={<Callback />} />
                     <Route path="*" element={<div>Not found</div>} />
                   </Routes>
+                  <CustomSnackbar />
                 </ThemeProvider>
               </RainbowKitProvider>
             </RainbowKitAuthenticationProvider>

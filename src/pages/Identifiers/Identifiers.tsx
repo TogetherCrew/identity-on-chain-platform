@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState, useCallback } from 'react';
 import {
   List,
@@ -12,6 +13,8 @@ import {
   Avatar,
   CircularProgress,
   IconButton,
+  Backdrop,
+  Stack,
 } from '@mui/material';
 import VerifiedIcon from '@mui/icons-material/Verified';
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -79,22 +82,24 @@ const IdentifierItem: React.FC<IdentifierItemProps> = ({
                 <VerifiedIcon sx={{ color: 'blue', mr: 1 }} />
               )}
               <Typography>{identifier.name}</Typography>
-              <div className="ml-3">
-                {isRevealedPending ? (
-                  <CircularProgress size={24} />
-                ) : (
-                  <>
-                    {isRevealed !== '*********' ? isRevealed : '*********'}
-                    <IconButton onClick={onReveal} sx={{ ml: 1 }}>
-                      {isRevealed !== '*********' ? (
-                        <VisibilityOffIcon />
-                      ) : (
-                        <VisibilityIcon />
-                      )}
-                    </IconButton>
-                  </>
-                )}
-              </div>
+              {identifier.verified && (
+                <div className="ml-3">
+                  {isRevealedPending ? (
+                    <CircularProgress size={24} />
+                  ) : (
+                    <>
+                      {isRevealed !== '*********' ? isRevealed : '*********'}
+                      <IconButton onClick={onReveal} sx={{ ml: 1 }}>
+                        {isRevealed !== '*********' ? (
+                          <VisibilityOffIcon />
+                        ) : (
+                          <VisibilityIcon />
+                        )}
+                      </IconButton>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
           }
           sx={{ ml: 2 }}
@@ -142,7 +147,11 @@ export function Identifiers() {
   const [attestations, setAttestations] = useState<
     (IAttestation & { provider?: string; id?: string })[]
   >([]);
-  const { data: attestationsResponse, refetch } = useGetAttestations();
+  const {
+    data: attestationsResponse,
+    refetch,
+    isLoading,
+  } = useGetAttestations();
 
   const { mutate: mutateRevokeIdentifier, data: revokeIdentifierResponse } =
     useRevokeIdentifierMutation();
@@ -355,6 +364,32 @@ export function Identifiers() {
 
     revokeIdentifier();
   }, [revokeIdentifierResponse]);
+
+  if (isLoading) {
+    return (
+      <Backdrop
+        open={isLoading}
+        sx={{
+          zIndex: (theme) => theme.zIndex.drawer + 1,
+          background: '#fff',
+          color: 'black',
+        }}
+      >
+        <Stack
+          sx={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+          }}
+        >
+          <CircularProgress color="inherit" />
+          <Typography variant="h6" gutterBottom style={{ marginLeft: '15px' }}>
+            Loading...
+          </Typography>
+        </Stack>
+      </Backdrop>
+    );
+  }
 
   return (
     <div>
