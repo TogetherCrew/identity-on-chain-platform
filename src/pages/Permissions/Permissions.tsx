@@ -24,12 +24,20 @@ export function Permissions() {
     AccessData[]
   >([]);
 
-  const { data, isLoading: isLoadingApplications } = useReadContract({
+  const {
+    data,
+    isLoading: isLoadingApplications,
+    error,
+  } = useReadContract({
     abi: sepoliaChainAppConctract.appContractABI,
     address: sepoliaChainAppConctract.appContractAddress as Address,
     functionName: 'getApplications',
     args: applicationsArgs,
   });
+
+  if (error) {
+    throw new Error('Error fetching applications');
+  }
 
   const applications = useMemo(
     () => (data as { name: string; account: string }[]) || [],
@@ -123,9 +131,9 @@ export function Permissions() {
   }, [hasPermissionsOnApp, attestations, applications]);
 
   const providers: Platform[] = attestations.map((attestation) => ({
-    id: attestation.id || '',
+    id: attestation.id || 'Unknown',
     provider: attestation.provider || 'Unknown',
-    uid: attestation.id || '',
+    uid: attestation.id || 'Unknown',
   }));
 
   const handleGrantOrRevokeAccess = (application: any, platform: any) => {
