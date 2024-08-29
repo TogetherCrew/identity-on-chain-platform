@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState, useCallback } from 'react';
 import {
   List,
@@ -12,6 +14,8 @@ import {
   Avatar,
   CircularProgress,
   IconButton,
+  Backdrop,
+  Stack,
 } from '@mui/material';
 import VerifiedIcon from '@mui/icons-material/Verified';
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -35,6 +39,7 @@ import {
 } from '../../services/api/eas/query';
 import { RevokePayload } from '../../interfaces';
 import { convertStringsToBigInts } from '../../utils/helper';
+import useSnackbarStore from '../../store/useSnackbarStore';
 
 interface IdentifierItemProps {
   identifier: {
@@ -79,22 +84,24 @@ const IdentifierItem: React.FC<IdentifierItemProps> = ({
                 <VerifiedIcon sx={{ color: 'blue', mr: 1 }} />
               )}
               <Typography>{identifier.name}</Typography>
-              <div className="ml-3">
-                {isRevealedPending ? (
-                  <CircularProgress size={24} />
-                ) : (
-                  <>
-                    {isRevealed !== '*********' ? isRevealed : '*********'}
-                    <IconButton onClick={onReveal} sx={{ ml: 1 }}>
-                      {isRevealed !== '*********' ? (
-                        <VisibilityOffIcon />
-                      ) : (
-                        <VisibilityIcon />
-                      )}
-                    </IconButton>
-                  </>
-                )}
-              </div>
+              {identifier.verified && (
+                <div className="ml-3">
+                  {isRevealedPending ? (
+                    <CircularProgress size={24} />
+                  ) : (
+                    <>
+                      {isRevealed !== '*********' ? isRevealed : '*********'}
+                      <IconButton onClick={onReveal} sx={{ ml: 1 }}>
+                        {isRevealed !== '*********' ? (
+                          <VisibilityOffIcon />
+                        ) : (
+                          <VisibilityIcon />
+                        )}
+                      </IconButton>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
           }
           sx={{ ml: 2 }}
@@ -103,7 +110,7 @@ const IdentifierItem: React.FC<IdentifierItemProps> = ({
           {identifier.verified ? (
             <Button
               variant="outlined"
-              color="error"
+              color="inherit"
               onClick={() => onRevoke(identifier.uid)}
               disabled={isLoading}
               startIcon={isLoading ? <CircularProgress size={16} /> : null}
@@ -126,7 +133,10 @@ const IdentifierItem: React.FC<IdentifierItemProps> = ({
 );
 
 export function Identifiers() {
+  const { showSnackbar } = useSnackbarStore();
   const { chainId } = useAccount();
+  const navigate = useNavigate();
+
   const signer = useSigner();
 
   const [identifiers, setIdentifiers] = useState([
@@ -142,7 +152,11 @@ export function Identifiers() {
   const [attestations, setAttestations] = useState<
     (IAttestation & { provider?: string; id?: string })[]
   >([]);
-  const { data: attestationsResponse, refetch } = useGetAttestations();
+  const {
+    data: attestationsResponse,
+    refetch,
+    isLoading,
+  } = useGetAttestations();
 
   const { mutate: mutateRevokeIdentifier, data: revokeIdentifierResponse } =
     useRevokeIdentifierMutation();
@@ -216,8 +230,6 @@ export function Identifiers() {
 
     setRevealedIdentifiers(initialRevealedState);
   }, [attestations]);
-
-  const navigate = useNavigate();
 
   const handleRevoke = useCallback(
     (uid: string) => {
@@ -298,7 +310,7 @@ export function Identifiers() {
   useEffect(() => {
     const revokeIdentifier = async () => {
       if (revokeIdentifierResponse) {
-        console.log('Revoke identifier response', revokeIdentifierResponse);
+        console.log('Revoke identifier response:', revokeIdentifierResponse);
 
         const payload: RevokePayload = convertStringsToBigInts(
           revokeIdentifierResponse.data
@@ -328,8 +340,12 @@ export function Identifiers() {
             };
 
             const tx = await eas.revokeByDelegation(transformedPayload);
-
             await tx.wait();
+            console.log({ tx });
+
+            showSnackbar('Identifier revoked successfully', {
+              severity: 'success',
+            });
 
             setLoadingIdentifiers((prev) => ({
               ...prev,
@@ -338,8 +354,17 @@ export function Identifiers() {
           } else {
             throw new Error('Invalid message type for revocation');
           }
-        } catch (error) {
-          console.error('Error during revocation:', error);
+        } catch (error: any) {
+          const errorCode = error?.info?.error?.code || '';
+
+          if (errorCode === 4001) {
+            showSnackbar(
+              `${errorCode}, you reject the transaction. please try again...`,
+              {
+                severity: 'error',
+              }
+            );
+          }
 
           if ('uid' in payload.message) {
             setLoadingIdentifiers((prev) => ({
@@ -355,6 +380,32 @@ export function Identifiers() {
 
     revokeIdentifier();
   }, [revokeIdentifierResponse]);
+
+  if (isLoading) {
+    return (
+      <Backdrop
+        open={isLoading}
+        sx={{
+          zIndex: (theme) => theme.zIndex.drawer + 1,
+          background: '#fff',
+          color: 'black',
+        }}
+      >
+        <Stack
+          sx={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+          }}
+        >
+          <CircularProgress color="inherit" />
+          <Typography variant="h6" gutterBottom style={{ marginLeft: '15px' }}>
+            Loading...
+          </Typography>
+        </Stack>
+      </Backdrop>
+    );
+  }
 
   return (
     <div>

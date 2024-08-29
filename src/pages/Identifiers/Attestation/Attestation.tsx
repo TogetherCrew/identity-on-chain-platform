@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from 'react';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
@@ -21,6 +22,7 @@ import {
   convertStringsToBigInts,
   getTokenForProvider,
 } from '../../../utils/helper';
+import useSnackbarStore from '../../../store/useSnackbarStore';
 
 const steps = [{ label: 'Auth' }, { label: 'Attest' }, { label: 'Transact' }];
 
@@ -31,7 +33,7 @@ type DecodedToken = { provider: Provider; iat: number; exp: number };
 export function Attestation() {
   const { isConnected, address } = useAccount();
   const signer = useSigner();
-
+  const { showSnackbar } = useSnackbarStore();
   const { providers } = useParams<{ providers: 'DISCORD' | 'GOOGLE' }>();
   const location = useLocation();
   const navigate = useNavigate();
@@ -149,9 +151,26 @@ export function Attestation() {
 
       const newAttestationUID = await tx.wait();
 
+      showSnackbar('Attestation created successfully', {
+        severity: 'success',
+      });
+
+      navigate('/identifiers');
+
       console.log('New attestation UID:', newAttestationUID);
 
       console.log('Transaction receipt:', tx.receipt);
+    } catch (error: any) {
+      const errorCode = error?.info?.error?.code || '';
+
+      if (errorCode === 4001) {
+        showSnackbar(
+          `${errorCode}, you reject the transaction. please try again...`,
+          {
+            severity: 'error',
+          }
+        );
+      }
     } finally {
       setIsAttesting(false);
     }

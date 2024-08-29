@@ -1,8 +1,23 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useMemo, useState } from 'react';
-import { useReadContract, useReadContracts, useWriteContract } from 'wagmi';
+import {
+  useReadContract,
+  useReadContracts,
+  useWriteContract,
+  useWaitForTransactionReceipt,
+} from 'wagmi';
 import { Address, Abi } from 'viem';
-import { Backdrop, CircularProgress, Stack, Typography } from '@mui/material';
+import {
+  Alert,
+  Backdrop,
+  Box,
+  Button,
+  CircularProgress,
+  Stack,
+  Typography,
+} from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import { useGetAttestations } from '../../services/eas/query';
 import sepoliaChainAppConctract from '../../utils/contracts/app/sepoliaChain.json';
 import sepoliaChainOidonctract from '../../utils/contracts/oid/sepoliaChain.json';
@@ -11,11 +26,26 @@ import CustomTable, {
   Platform,
   AccessData,
 } from '../../components/shared/CustomTable';
+import useSnackbarStore from '../../store/useSnackbarStore';
 
 export function Permissions() {
-  const { writeContract, isPending: isWriting } = useWriteContract();
-  const { data: attestationsResponse, isLoading: isLoadingAttestations } =
-    useGetAttestations();
+  const { showSnackbar } = useSnackbarStore();
+  const navigate = useNavigate();
+  const {
+    data: transactionHash,
+    writeContract,
+    isPending: isWriting,
+  } = useWriteContract();
+  const { isLoading: isConfirming, isSuccess: isConfirmed } =
+    useWaitForTransactionReceipt({
+      hash: transactionHash,
+    });
+
+  const {
+    data: attestationsResponse,
+    isLoading: isLoadingAttestations,
+    refetch: refetchAttestations,
+  } = useGetAttestations();
   const [applicationsArgs] = useState<[number, number]>([0, 10]);
   const [attestations, setAttestations] = useState<
     (IAttestation & { provider?: string; id?: string })[]
@@ -28,6 +58,7 @@ export function Permissions() {
     data,
     isLoading: isLoadingApplications,
     error,
+    refetch: refetchApplications,
   } = useReadContract({
     abi: sepoliaChainAppConctract.appContractABI,
     address: sepoliaChainAppConctract.appContractAddress as Address,
@@ -87,10 +118,13 @@ export function Permissions() {
     [attestations, applications]
   );
 
-  const { data: hasPermissionsOnApp, isLoading: isLoadingPermissions } =
-    useReadContracts({
-      contracts: contractCalls,
-    });
+  const {
+    data: hasPermissionsOnApp,
+    isLoading: isLoadingPermissions,
+    refetch: refetchPermissions,
+  } = useReadContracts({
+    contracts: contractCalls,
+  });
 
   useEffect(() => {
     if (hasPermissionsOnApp) {
@@ -137,21 +171,51 @@ export function Permissions() {
   }));
 
   const handleGrantOrRevokeAccess = (application: any, platform: any) => {
-    writeContract({
-      abi: sepoliaChainOidonctract.oidContractAbi as Abi,
-      address: sepoliaChainOidonctract.oidContractAddress as Address,
-      functionName: application.hasPermission
-        ? 'revokePermission'
-        : 'grantPermission',
-      args: [platform.uid, application.account],
-    });
+    writeContract(
+      {
+        abi: sepoliaChainOidonctract.oidContractAbi as Abi,
+        address: sepoliaChainOidonctract.oidContractAddress as Address,
+        functionName: application.hasPermission
+          ? 'revokePermission'
+          : 'grantPermission',
+        args: [platform.uid, application.account],
+      },
+      {
+        // eslint-disable-next-line @typescript-eslint/no-shadow
+        onError: (error: any) => {
+          const errorCode = error.cause?.code || error.code;
+
+          if (errorCode === 4001) {
+            showSnackbar(
+              `${errorCode}, you rejected the transaction. Please try again...`,
+              {
+                severity: 'error',
+              }
+            );
+          } else {
+            showSnackbar(`Transaction failed: ${error.message}`, {
+              severity: 'error',
+            });
+          }
+        },
+      }
+    );
   };
+
+  useEffect(() => {
+    if (isConfirmed) {
+      refetchAttestations();
+      refetchApplications();
+      refetchPermissions();
+    }
+  }, [isConfirmed]);
 
   const isLoading =
     isWriting ||
     isLoadingAttestations ||
     isLoadingApplications ||
-    isLoadingPermissions;
+    isLoadingPermissions ||
+    isConfirming;
 
   return (
     <div>
@@ -176,14 +240,47 @@ export function Permissions() {
           </Typography>
         </Stack>
       </Backdrop>
-      <Typography variant="h6" gutterBottom>
-        Permissions
-      </Typography>
-      <CustomTable
-        xcolumns={providers}
-        ycolumns={permissionsWithUidsAndApps}
-        handleGrantOrRevokeAccess={handleGrantOrRevokeAccess}
-      />
+      {!isLoading && providers.length === 0 ? (
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            width: '100%',
+            height: '80vh',
+          }}
+        >
+          <Alert severity="warning" sx={{ mb: 2 }}>
+            To be able to grant or revoke access to applications, you need to
+            have at least one identifier.
+          </Alert>
+          <Button
+            variant="contained"
+            color="warning"
+            onClick={() => {
+              navigate('/identifiers');
+            }}
+          >
+            Go to Identifiers
+          </Button>
+        </Box>
+      ) : (
+        <>
+          <Typography variant="h6" gutterBottom>
+            Permissions
+          </Typography>
+          <Alert severity="info" sx={{ mb: 2 }}>
+            <b>Note</b>: The process of revoking or granting access to
+            applications may take some time.
+          </Alert>
+          <CustomTable
+            xcolumns={providers}
+            ycolumns={permissionsWithUidsAndApps}
+            handleGrantOrRevokeAccess={handleGrantOrRevokeAccess}
+          />
+        </>
+      )}
     </div>
   );
 }

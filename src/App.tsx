@@ -23,13 +23,14 @@ import { api } from './services/api';
 
 import DefaultLayout from './layouts/DefaultLayout';
 
-import Dashboard from './pages/Dashboard';
+// import Dashboard from './pages/Dashboard';
 import Identifiers from './pages/Identifiers';
 import Permissions from './pages/Permissions';
 import Attestation from './pages/Identifiers/Attestation';
 import Callback from './pages/Callback';
 import ProtectedRoute from './ProtectedRoute';
 import { LitProvider } from './hooks/LitProvider';
+import { CustomSnackbar } from './components/shared/CustomSnackbar';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -142,7 +143,10 @@ const App: React.FC = () => {
                         </ProtectedRoute>
                       }
                     >
-                      <Route path="/" element={<Dashboard />} />
+                      <Route
+                        path="/"
+                        element={<Navigate to="/identifiers" />}
+                      />
                       <Route path="/identifiers" element={<Identifiers />} />
                       <Route
                         path="identifiers/:providers/attestation"
@@ -153,6 +157,7 @@ const App: React.FC = () => {
                     <Route path="/callback" element={<Callback />} />
                     <Route path="*" element={<div>Not found</div>} />
                   </Routes>
+                  <CustomSnackbar />
                 </ThemeProvider>
               </RainbowKitProvider>
             </RainbowKitAuthenticationProvider>
