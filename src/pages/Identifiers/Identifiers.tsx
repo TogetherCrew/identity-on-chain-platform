@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState, useCallback } from 'react';
 import {
@@ -38,6 +39,7 @@ import {
 } from '../../services/api/eas/query';
 import { RevokePayload } from '../../interfaces';
 import { convertStringsToBigInts } from '../../utils/helper';
+import useSnackbarStore from '../../store/useSnackbarStore';
 
 interface IdentifierItemProps {
   identifier: {
@@ -108,7 +110,7 @@ const IdentifierItem: React.FC<IdentifierItemProps> = ({
           {identifier.verified ? (
             <Button
               variant="outlined"
-              color="error"
+              color="inherit"
               onClick={() => onRevoke(identifier.uid)}
               disabled={isLoading}
               startIcon={isLoading ? <CircularProgress size={16} /> : null}
@@ -131,7 +133,10 @@ const IdentifierItem: React.FC<IdentifierItemProps> = ({
 );
 
 export function Identifiers() {
+  const { showSnackbar } = useSnackbarStore();
   const { chainId } = useAccount();
+  const navigate = useNavigate();
+
   const signer = useSigner();
 
   const [identifiers, setIdentifiers] = useState([
@@ -226,8 +231,6 @@ export function Identifiers() {
     setRevealedIdentifiers(initialRevealedState);
   }, [attestations]);
 
-  const navigate = useNavigate();
-
   const handleRevoke = useCallback(
     (uid: string) => {
       const siweJwt = localStorage.getItem('OCI_TOKEN');
@@ -307,7 +310,7 @@ export function Identifiers() {
   useEffect(() => {
     const revokeIdentifier = async () => {
       if (revokeIdentifierResponse) {
-        console.log('Revoke identifier response', revokeIdentifierResponse);
+        console.log('Revoke identifier response:', revokeIdentifierResponse);
 
         const payload: RevokePayload = convertStringsToBigInts(
           revokeIdentifierResponse.data
@@ -337,8 +340,12 @@ export function Identifiers() {
             };
 
             const tx = await eas.revokeByDelegation(transformedPayload);
-
             await tx.wait();
+            console.log({ tx });
+
+            showSnackbar('Identifier revoked successfully', {
+              severity: 'success',
+            });
 
             setLoadingIdentifiers((prev) => ({
               ...prev,
@@ -347,8 +354,17 @@ export function Identifiers() {
           } else {
             throw new Error('Invalid message type for revocation');
           }
-        } catch (error) {
-          console.error('Error during revocation:', error);
+        } catch (error: any) {
+          const errorCode = error?.info?.error?.code || '';
+
+          if (errorCode === 4001) {
+            showSnackbar(
+              `${errorCode}, you reject the transaction. please try again...`,
+              {
+                severity: 'error',
+              }
+            );
+          }
 
           if ('uid' in payload.message) {
             setLoadingIdentifiers((prev) => ({

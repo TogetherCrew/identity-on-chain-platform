@@ -1,4 +1,4 @@
-import SpaceDashboardIcon from '@mui/icons-material/SpaceDashboard';
+// import SpaceDashboardIcon from '@mui/icons-material/SpaceDashboard';
 import FingerprintIcon from '@mui/icons-material/Fingerprint';
 import { SiAdguard } from 'react-icons/si';
 import { SvgIconComponent } from '@mui/icons-material';
@@ -13,11 +13,11 @@ export interface MenuItem {
 export const DRAWER_WIDTH = 240;
 
 export const SIDEBAR_MENU: MenuItem[] = [
-  {
-    title: 'Dashboard',
-    path: '/',
-    icon: SpaceDashboardIcon,
-  },
+  // {
+  //   title: 'Dashboard',
+  //   path: '/',
+  //   icon: SpaceDashboardIcon,
+  // },
   {
     title: 'Identifiers',
     path: '/identifiers',

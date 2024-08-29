@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import CircularProgress from '@mui/material/CircularProgress';
 import Backdrop from '@mui/material/Backdrop';
+import { useAccount } from 'wagmi';
 
 interface ProtectedRouteProps {
   children: JSX.Element;
@@ -10,6 +11,15 @@ interface ProtectedRouteProps {
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+
+  const { isConnected } = useAccount();
+
+  useEffect(() => {
+    if (!isConnected) {
+      setIsAuthenticated(false);
+      localStorage.removeItem('OCI_TOKEN');
+    }
+  }, [isConnected]);
 
   useEffect(() => {
     const checkAuthStatus = async () => {

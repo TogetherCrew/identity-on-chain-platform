@@ -143,7 +143,10 @@ const App: React.FC = () => {
                         </ProtectedRoute>
                       }
                     >
-                      <Route path="/" element={<Dashboard />} />
+                      <Route
+                        path="/"
+                        element={<Navigate to="/identifiers" />}
+                      />
                       <Route path="/identifiers" element={<Identifiers />} />
                       <Route
                         path="identifiers/:providers/attestation"

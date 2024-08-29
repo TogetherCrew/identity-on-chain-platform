@@ -1,4 +1,6 @@
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import useSnackbarStore from '../../store/useSnackbarStore';
 
 export const baseURL = import.meta.env.VITE_API_BASE_URL;
 
@@ -31,6 +33,33 @@ apiInstance.interceptors.request.use(
     return config;
   },
   (error) => {
+    return Promise.reject(error);
+  }
+);
+
+apiInstance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const navigate = useNavigate();
+    const { showSnackbar } = useSnackbarStore();
+    console.log(error.response, 'test');
+
+    if (error.response?.status === 400) {
+      showSnackbar('Bad Request', {
+        severity: 'error',
+      });
+    }
+
+    if (error.response?.status === 401) {
+      // Show the snackbar message
+      showSnackbar('Session expired. Please log in again.', {
+        severity: 'warning',
+      });
+
+      // Redirect the user to the login page
+      navigate('/auth/login');
+    }
+
     return Promise.reject(error);
   }
 );
