@@ -23,7 +23,7 @@ import { api } from './services/api';
 
 import DefaultLayout from './layouts/DefaultLayout';
 
-import Dashboard from './pages/Dashboard';
+// import Dashboard from './pages/Dashboard';
 import Identifiers from './pages/Identifiers';
 import Permissions from './pages/Permissions';
 import Attestation from './pages/Identifiers/Attestation';
