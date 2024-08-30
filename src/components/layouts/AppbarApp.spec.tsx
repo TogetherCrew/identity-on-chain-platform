@@ -1,16 +1,11 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import { IconButton, Avatar } from '@mui/material';
 import AppbarApp from './AppbarApp';
 
-vi.mock('./AccountPopover', () => ({
-  default: () => (
-    <div>
-      <IconButton data-testid="account-popover-button">
-        <Avatar />
-      </IconButton>
-      <div data-testid="account-popover">AccountPopover</div>
-    </div>
+// Mocking the ConnectButton from RainbowKit
+vi.mock('@rainbow-me/rainbowkit', () => ({
+  ConnectButton: () => (
+    <div data-testid="connect-button">Mocked ConnectButton</div>
   ),
 }));
 
@@ -20,18 +15,12 @@ describe('AppbarApp', () => {
 
     const appBar = screen.getByTestId('Appbar');
     expect(appBar).toBeInTheDocument();
-
-    const accountPopover = screen.getByTestId('account-popover');
-    expect(accountPopover).toBeInTheDocument();
   });
 
-  it('should open AccountPopover on icon button click', () => {
+  it('should render the ConnectButton', () => {
     render(<AppbarApp />);
 
-    const iconButton = screen.getByTestId('account-popover-button');
-    fireEvent.click(iconButton);
-
-    const accountPopover = screen.getByTestId('account-popover');
-    expect(accountPopover).toBeVisible();
+    const connectButton = screen.getByTestId('connect-button');
+    expect(connectButton).toBeInTheDocument();
   });
 });
