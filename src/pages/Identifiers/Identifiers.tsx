@@ -134,7 +134,7 @@ const IdentifierItem: React.FC<IdentifierItemProps> = ({
 
 export function Identifiers() {
   const { showSnackbar } = useSnackbarStore();
-  const { chainId } = useAccount();
+  const { chainId, address } = useAccount();
   const navigate = useNavigate();
 
   const signer = useSigner();
@@ -156,7 +156,7 @@ export function Identifiers() {
     data: attestationsResponse,
     refetch,
     isLoading,
-  } = useGetAttestations();
+  } = useGetAttestations(address as `0x${string}`);
 
   const { mutate: mutateRevokeIdentifier, data: revokeIdentifierResponse } =
     useRevokeIdentifierMutation();
