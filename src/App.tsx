@@ -4,7 +4,7 @@ import '@rainbow-me/rainbowkit/styles.css';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
+import { Route, Routes, Navigate } from 'react-router-dom';
 import { WagmiProvider } from 'wagmi';
 import {
   AuthenticationStatus,
@@ -114,57 +114,52 @@ const App: React.FC = () => {
   globalThis.Buffer = Buffer;
 
   return (
-    <BrowserRouter>
-      <LitProvider litNetwork={LitNetwork.DatilDev}>
-        <WagmiProvider config={config}>
-          <QueryClientProvider client={queryClient}>
-            <RainbowKitAuthenticationProvider
-              adapter={authenticationAdapter}
-              status={authStatus}
-            >
-              <RainbowKitProvider initialChain={sepolia}>
-                <ThemeProvider theme={theme}>
-                  <CssBaseline />
-                  <Routes>
+    <LitProvider litNetwork={LitNetwork.DatilDev}>
+      <WagmiProvider config={config}>
+        <QueryClientProvider client={queryClient}>
+          <RainbowKitAuthenticationProvider
+            adapter={authenticationAdapter}
+            status={authStatus}
+          >
+            <RainbowKitProvider initialChain={sepolia}>
+              <ThemeProvider theme={theme}>
+                <CssBaseline />
+                <Routes>
+                  <Route
+                    path="/auth/login"
+                    element={
+                      authStatus === 'authenticated' ? (
+                        <Navigate to="/" replace />
+                      ) : (
+                        <Login />
+                      )
+                    }
+                  />
+                  <Route
+                    element={
+                      <ProtectedRoute>
+                        <DefaultLayout />
+                      </ProtectedRoute>
+                    }
+                  >
+                    <Route path="/" element={<Navigate to="/identifiers" />} />
+                    <Route path="/identifiers" element={<Identifiers />} />
                     <Route
-                      path="/auth/login"
-                      element={
-                        authStatus === 'authenticated' ? (
-                          <Navigate to="/" replace />
-                        ) : (
-                          <Login />
-                        )
-                      }
+                      path="identifiers/:providers/attestation"
+                      element={<Attestation />}
                     />
-                    <Route
-                      element={
-                        <ProtectedRoute>
-                          <DefaultLayout />
-                        </ProtectedRoute>
-                      }
-                    >
-                      <Route
-                        path="/"
-                        element={<Navigate to="/identifiers" />}
-                      />
-                      <Route path="/identifiers" element={<Identifiers />} />
-                      <Route
-                        path="identifiers/:providers/attestation"
-                        element={<Attestation />}
-                      />
-                      <Route path="/permissions" element={<Permissions />} />
-                    </Route>
-                    <Route path="/callback" element={<Callback />} />
-                    <Route path="*" element={<div>Not found</div>} />
-                  </Routes>
-                  <CustomSnackbar />
-                </ThemeProvider>
-              </RainbowKitProvider>
-            </RainbowKitAuthenticationProvider>
-          </QueryClientProvider>
-        </WagmiProvider>
-      </LitProvider>
-    </BrowserRouter>
+                    <Route path="/permissions" element={<Permissions />} />
+                  </Route>
+                  <Route path="/callback" element={<Callback />} />
+                  <Route path="*" element={<div>Not found</div>} />
+                </Routes>
+                <CustomSnackbar />
+              </ThemeProvider>
+            </RainbowKitProvider>
+          </RainbowKitAuthenticationProvider>
+        </QueryClientProvider>
+      </WagmiProvider>
+    </LitProvider>
   );
 };
 
