@@ -98,6 +98,19 @@ const App: React.FC = () => {
   });
 
   useEffect(() => {
+    const checkStoredToken = () => {
+      const OCI_TOKEN = localStorage.getItem('OCI_TOKEN');
+      if (OCI_TOKEN) {
+        setAuthStatus('authenticated');
+      } else {
+        setAuthStatus('unauthenticated');
+      }
+    };
+
+    checkStoredToken();
+  }, []);
+
+  useEffect(() => {
     console.log('authStatus', authStatus);
   }, [authStatus]);
 
