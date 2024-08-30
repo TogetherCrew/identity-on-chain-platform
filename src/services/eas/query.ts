@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { gql } from 'graphql-request';
+import { Address } from 'viem';
 import { ATTESTER_ADDRESS, graphQLClient } from '.';
 import { EAS_SCHEMA_ID } from '../../utils/contracts/eas/constants';
 import { IAttestation } from '../../libs/oci';
@@ -8,9 +9,9 @@ interface AttestationsResponse {
   attestations: IAttestation[];
 }
 
-export const useGetAttestations = () => {
+export const useGetAttestations = (recipient: Address) => {
   return useQuery<IAttestation[]>({
-    queryKey: ['getAttestations'],
+    queryKey: ['getAttestations', recipient],
     queryFn: async () => {
       const query = gql`
         query Attestations(
@@ -40,7 +41,7 @@ export const useGetAttestations = () => {
 
       const variables = {
         attester: ATTESTER_ADDRESS,
-        recipient: '0x026B727b60D336806B87d60e95B6d7FAd2443dD6',
+        recipient,
         schemaId: EAS_SCHEMA_ID,
       };
 
@@ -51,5 +52,6 @@ export const useGetAttestations = () => {
 
       return attestedResults.attestations;
     },
+    enabled: !!recipient,
   });
 };

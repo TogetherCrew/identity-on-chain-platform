@@ -4,7 +4,7 @@ import '@rainbow-me/rainbowkit/styles.css';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { Route, Routes, Navigate } from 'react-router-dom';
+import { Route, Routes, Navigate, useNavigate } from 'react-router-dom';
 import { WagmiProvider } from 'wagmi';
 import {
   AuthenticationStatus,
@@ -50,6 +50,7 @@ const config = getDefaultConfig({
 });
 
 const App: React.FC = () => {
+  const navigate = useNavigate();
   const [authStatus, setAuthStatus] =
     useState<AuthenticationStatus>('unauthenticated');
 
@@ -91,21 +92,10 @@ const App: React.FC = () => {
     },
     signOut: async () => {
       localStorage.removeItem('OCI_TOKEN');
+      navigate('/auth/login');
+      setAuthStatus('unauthenticated');
     },
   });
-
-  useEffect(() => {
-    const checkStoredToken = () => {
-      const OCI_TOKEN = localStorage.getItem('OCI_TOKEN');
-      if (OCI_TOKEN) {
-        setAuthStatus('authenticated');
-      } else {
-        setAuthStatus('unauthenticated');
-      }
-    };
-
-    checkStoredToken();
-  }, []);
 
   useEffect(() => {
     console.log('authStatus', authStatus);

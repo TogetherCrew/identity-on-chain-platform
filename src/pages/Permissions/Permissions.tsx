@@ -6,6 +6,7 @@ import {
   useReadContracts,
   useWriteContract,
   useWaitForTransactionReceipt,
+  useAccount,
 } from 'wagmi';
 import { Address, Abi } from 'viem';
 import {
@@ -30,6 +31,7 @@ import useSnackbarStore from '../../store/useSnackbarStore';
 
 export function Permissions() {
   const { showSnackbar } = useSnackbarStore();
+  const { address } = useAccount();
   const navigate = useNavigate();
   const {
     data: transactionHash,
@@ -45,7 +47,7 @@ export function Permissions() {
     data: attestationsResponse,
     isLoading: isLoadingAttestations,
     refetch: refetchAttestations,
-  } = useGetAttestations();
+  } = useGetAttestations(address as `0x${string}`);
   const [applicationsArgs] = useState<[number, number]>([0, 10]);
   const [attestations, setAttestations] = useState<
     (IAttestation & { provider?: string; id?: string })[]
