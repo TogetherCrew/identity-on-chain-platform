@@ -18,7 +18,7 @@ export function Login() {
       <Box
         className="w-3/4 h-full bg-cover bg-center"
         style={{
-          backgroundImage: 'url(../../../../public/img/login.webp)',
+          backgroundImage: 'url(/img/login.webp)',
           backgroundSize: 'cover',
           backgroundRepeat: 'no-repeat',
           backgroundPosition: 'center',
