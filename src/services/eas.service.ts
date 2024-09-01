@@ -145,7 +145,7 @@ class EASService {
 
     const convertedPayload = this.convertStringsToBigInts(
       attestationPayload
-    ) as DelegatedAttestationRequest;
+    ) as AttestPayload;
     const attestationRequest =
       EASService.prepareAttestationRequest(convertedPayload);
 

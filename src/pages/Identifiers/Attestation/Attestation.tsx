@@ -19,7 +19,7 @@ export default function Attestation() {
   const [activeStep, setActiveStep] = useState<number>(0);
   const { provider } = useParams<{ provider: Provider }>();
   const [attestedSignutare, setAttestedSignature] =
-    useState<AttestPayload | null>();
+    useState<AttestPayload | null>(null);
 
   const handleNextStep = () => {
     setActiveStep((prevStep) => prevStep + 1);
