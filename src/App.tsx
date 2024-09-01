@@ -1,36 +1,31 @@
 import './App.css';
 import '@rainbow-me/rainbowkit/styles.css';
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { LitNetwork } from '@lit-protocol/constants';
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider } from '@mui/material/styles';
 import {
-  AuthenticationStatus,
-  createAuthenticationAdapter,
   getDefaultConfig,
   RainbowKitAuthenticationProvider,
   RainbowKitProvider,
 } from '@rainbow-me/rainbowkit';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Navigate, Route, Routes, useNavigate } from 'react-router-dom';
-import { getAddress } from 'viem';
-import { createSiweMessage } from 'viem/siwe';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import { WagmiProvider } from 'wagmi';
 import { sepolia } from 'wagmi/chains';
 
 import { CustomSnackbar } from './components/shared/CustomSnackbar';
 import { LitProvider } from './hooks/LitProvider';
+import useSiweAuth from './hooks/useSiweAuth';
 import DefaultLayout from './layouts/DefaultLayout';
 import theme from './libs/theme';
 import Login from './pages/Auth/Login';
 import Callback from './pages/Callback';
-// import Dashboard from './pages/Dashboard';
 import Identifiers from './pages/Identifiers';
 import Attestation from './pages/Identifiers/Attestation';
 import Permissions from './pages/Permissions';
 import ProtectedRoute from './ProtectedRoute';
-import { api } from './services/api';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -50,69 +45,7 @@ const config = getDefaultConfig({
 });
 
 const App: React.FC = () => {
-  const navigate = useNavigate();
-  const [authStatus, setAuthStatus] =
-    useState<AuthenticationStatus>('unauthenticated');
-
-  const authenticationAdapter = createAuthenticationAdapter({
-    getNonce: async () => {
-      const { data } = await api.get('auth/siwe/nonce');
-      return data.nonce;
-    },
-    createMessage: ({ nonce, address, chainId }) => {
-      return createSiweMessage({
-        address: getAddress(address),
-        chainId,
-        domain: window.location.host,
-        nonce,
-        uri: window.location.origin,
-        version: '1',
-        statement: 'Sign in with Ethereum to the app.',
-      });
-    },
-    getMessageBody: ({ message }) => message,
-    verify: async ({ message, signature }) => {
-      const { data } = await api.post('auth/siwe/verify', {
-        message,
-        signature,
-        chainId: 11155111,
-      });
-
-      if (!data) {
-        throw new Error('Verification response data is empty');
-      }
-
-      if (data?.jwt) {
-        localStorage.setItem('OCI_TOKEN', data.jwt);
-        setAuthStatus('authenticated');
-        return true;
-      }
-
-      return false;
-    },
-    signOut: async () => {
-      localStorage.removeItem('OCI_TOKEN');
-      navigate('/auth/login');
-      setAuthStatus('unauthenticated');
-    },
-  });
-
-  useEffect(() => {
-    const checkStoredToken = () => {
-      const OCI_TOKEN = localStorage.getItem('OCI_TOKEN');
-      if (OCI_TOKEN) {
-        setAuthStatus('authenticated');
-      } else {
-        setAuthStatus('unauthenticated');
-      }
-    };
-
-    checkStoredToken();
-  }, []);
-
-  useEffect(() => {
-    console.log('authStatus', authStatus);
-  }, [authStatus]);
+  const { authStatus, authenticationAdapter } = useSiweAuth();
 
   globalThis.Buffer = Buffer;
 
