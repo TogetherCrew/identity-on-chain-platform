@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from 'react';
 import './App.css';
 import '@rainbow-me/rainbowkit/styles.css';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ThemeProvider } from '@mui/material/styles';
+
+import React, { useEffect, useState } from 'react';
+import { LitNetwork } from '@lit-protocol/constants';
 import CssBaseline from '@mui/material/CssBaseline';
-import { Route, Routes, Navigate, useNavigate } from 'react-router-dom';
-import { WagmiProvider } from 'wagmi';
+import { ThemeProvider } from '@mui/material/styles';
 import {
   AuthenticationStatus,
   createAuthenticationAdapter,
@@ -13,24 +12,25 @@ import {
   RainbowKitAuthenticationProvider,
   RainbowKitProvider,
 } from '@rainbow-me/rainbowkit';
-import { sepolia } from 'wagmi/chains';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 import { getAddress } from 'viem';
 import { createSiweMessage } from 'viem/siwe';
-import { LitNetwork } from '@lit-protocol/constants';
-import Login from './pages/Auth/Login';
-import theme from './libs/theme';
-import { api } from './services/api';
+import { WagmiProvider } from 'wagmi';
+import { sepolia } from 'wagmi/chains';
 
+import { CustomSnackbar } from './components/shared/CustomSnackbar';
+import { LitProvider } from './hooks/LitProvider';
 import DefaultLayout from './layouts/DefaultLayout';
-
+import theme from './libs/theme';
+import Login from './pages/Auth/Login';
+import Callback from './pages/Callback';
 // import Dashboard from './pages/Dashboard';
 import Identifiers from './pages/Identifiers';
-import Permissions from './pages/Permissions';
 import Attestation from './pages/Identifiers/Attestation';
-import Callback from './pages/Callback';
+import Permissions from './pages/Permissions';
 import ProtectedRoute from './ProtectedRoute';
-import { LitProvider } from './hooks/LitProvider';
-import { CustomSnackbar } from './components/shared/CustomSnackbar';
+import { api } from './services/api';
 
 const queryClient = new QueryClient({
   defaultOptions: {

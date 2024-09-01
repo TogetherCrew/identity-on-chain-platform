@@ -1,5 +1,5 @@
-import { baseURL } from '..';
 import { PlatformAuthenticationParams } from '@/interfaces';
+import { baseURL } from '..';
 
 export const platformAuthentication = async ({
   platformType,

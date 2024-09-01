@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 import { useCallback, useState } from 'react';
 import {
-  generateAuthSig,
-  createSiweMessageWithRecaps,
   AuthSig,
-  LitActionResource,
+  createSiweMessageWithRecaps,
+  generateAuthSig,
   LitAbility,
+  LitActionResource,
 } from '@lit-protocol/auth-helpers';
+import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { AuthCallbackParams, SessionSigsMap } from '@lit-protocol/types';
 import { Signer } from 'ethers';
-import { LitNodeClient } from '@lit-protocol/lit-node-client';
 
 interface ICreateSessionSigs {
   signer: Signer;

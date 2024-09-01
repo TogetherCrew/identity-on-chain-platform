@@ -1,45 +1,46 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useEffect, useState, useCallback } from 'react';
-import {
-  List,
-  ListItem,
-  ListItemText,
-  ListItemSecondaryAction,
-  Button,
-  Typography,
-  Divider,
-  Paper,
-  Box,
-  Avatar,
-  CircularProgress,
-  IconButton,
-  Backdrop,
-  Stack,
-} from '@mui/material';
-import VerifiedIcon from '@mui/icons-material/Verified';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import { FaDiscord, FaGoogle } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
-import clsx from 'clsx';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   DelegatedRevocationRequest,
   EAS,
 } from '@ethereum-attestation-service/eas-sdk';
+import VerifiedIcon from '@mui/icons-material/Verified';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import {
+  Avatar,
+  Backdrop,
+  Box,
+  Button,
+  CircularProgress,
+  Divider,
+  IconButton,
+  List,
+  ListItem,
+  ListItemSecondaryAction,
+  ListItemText,
+  Paper,
+  Stack,
+  Typography,
+} from '@mui/material';
+import clsx from 'clsx';
+import { FaDiscord, FaGoogle } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 import { Address } from 'viem';
 import { useAccount } from 'wagmi';
-import { useGetAttestations } from '../../services/eas/query';
+
+import { RevokePayload } from '../../interfaces';
 import { decodeAttestationData, IAttestation } from '../../libs/oci';
-import sepoliaChain from '../../utils/contracts/eas/sepoliaChain.json';
-import { useSigner } from '../../utils/eas-wagmi-utils';
 import {
   useDecryptAttestationsSecretMutation,
   useRevokeIdentifierMutation,
 } from '../../services/api/eas/query';
-import { RevokePayload } from '../../interfaces';
-import { convertStringsToBigInts } from '../../utils/helper';
+import { useGetAttestations } from '../../services/eas/query';
 import useSnackbarStore from '../../store/useSnackbarStore';
+import sepoliaChain from '../../utils/contracts/eas/sepoliaChain.json';
+import { useSigner } from '../../utils/eas-wagmi-utils';
+import { convertStringsToBigInts } from '../../utils/helper';
 
 interface IdentifierItemProps {
   identifier: {

@@ -1,13 +1,13 @@
 import {
-  ReactElement,
   createContext,
+  ReactElement,
   useContext,
   useEffect,
   useMemo,
   useState,
 } from 'react';
-import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { LitNetwork } from '@lit-protocol/constants';
+import { LitNodeClient } from '@lit-protocol/lit-node-client';
 
 interface ILitProvider {
   litNetwork: LitNetwork;

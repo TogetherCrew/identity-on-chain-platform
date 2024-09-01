@@ -1,14 +1,14 @@
-import { useState, MouseEvent } from 'react';
+import { MouseEvent, useState } from 'react';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import LogoutIcon from '@mui/icons-material/Logout';
 import {
   Avatar,
-  Popover,
-  MenuItem,
   IconButton,
+  MenuItem,
+  Popover,
   Typography,
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import LogoutIcon from '@mui/icons-material/Logout';
 
 function AccountPopover() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);

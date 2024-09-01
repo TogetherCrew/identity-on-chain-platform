@@ -1,28 +1,29 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, useEffect } from 'react';
-import Paper from '@mui/material/Paper';
-import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
-import CircularProgress from '@mui/material/CircularProgress';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { jwtDecode } from 'jwt-decode';
-import { Address } from 'viem';
-import { useAccount } from 'wagmi';
+import { useEffect, useState } from 'react';
 import {
   DelegatedAttestationRequest,
   EAS,
 } from '@ethereum-attestation-service/eas-sdk';
+import Button from '@mui/material/Button';
+import CircularProgress from '@mui/material/CircularProgress';
+import Paper from '@mui/material/Paper';
+import Typography from '@mui/material/Typography';
+import { jwtDecode } from 'jwt-decode';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Address } from 'viem';
+import { useAccount } from 'wagmi';
+
 import StepperComponent from '../../../components/shared/CustomStepper';
+import { AttestPayload } from '../../../interfaces';
 import { platformAuthentication } from '../../../services/api/auth';
 import { useLinkIdentifierMutation } from '../../../services/api/eas/query';
+import useSnackbarStore from '../../../store/useSnackbarStore';
 import sepoliaChain from '../../../utils/contracts/eas/sepoliaChain.json';
 import { useSigner } from '../../../utils/eas-wagmi-utils';
-import { AttestPayload } from '../../../interfaces';
 import {
   convertStringsToBigInts,
   getTokenForProvider,
 } from '../../../utils/helper';
-import useSnackbarStore from '../../../store/useSnackbarStore';
 
 const steps = [{ label: 'Auth' }, { label: 'Attest' }, { label: 'Transact' }];
 

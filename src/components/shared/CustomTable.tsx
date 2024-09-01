@@ -1,14 +1,15 @@
 import {
-  TableContainer,
+  Avatar,
+  Card,
   Table,
+  TableBody,
+  TableCell,
+  TableContainer,
   TableHead,
   TableRow,
-  TableCell,
-  TableBody,
-  Avatar,
   Typography,
-  Card,
 } from '@mui/material';
+
 import AccessControlButton from './AccessControlButton';
 
 export interface Platform {

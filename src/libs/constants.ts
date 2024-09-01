@@ -1,8 +1,8 @@
 // import SpaceDashboardIcon from '@mui/icons-material/SpaceDashboard';
-import FingerprintIcon from '@mui/icons-material/Fingerprint';
-import { SiAdguard } from 'react-icons/si';
 import { SvgIconComponent } from '@mui/icons-material';
+import FingerprintIcon from '@mui/icons-material/Fingerprint';
 import { IconType } from 'react-icons';
+import { SiAdguard } from 'react-icons/si';
 
 export interface MenuItem {
   title: string;
