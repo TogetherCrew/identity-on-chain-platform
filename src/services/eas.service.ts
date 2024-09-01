@@ -1,11 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
+  DelegatedAttestationRequest,
   DelegatedRevocationRequest,
   EAS,
 } from '@ethereum-attestation-service/eas-sdk';
 import { JsonRpcSigner } from 'ethers';
 import { Address } from 'viem';
 
-import { RevokePayload } from '../interfaces';
+import { AttestPayload, RevokePayload } from '../interfaces';
 
 class EASService {
   private eas: EAS | null = null;
@@ -84,6 +86,28 @@ class EASService {
   }
 
   /**
+   * Static method to prepare the attestation request from a payload.
+   * @param payload The payload containing the attestation details.
+   */
+  private static prepareAttestationRequest(
+    payload: AttestPayload
+  ): DelegatedAttestationRequest {
+    return {
+      schema: payload.message.schema,
+      data: {
+        recipient: payload.message.recipient,
+        expirationTime: payload.message.expirationTime,
+        revocable: payload.message.revocable,
+        refUID: payload.message.refUID,
+        data: payload.message.data,
+      },
+      signature: payload.signature,
+      attester: payload.message.attester as string,
+      deadline: 0n,
+    };
+  }
+
+  /**
    * Revokes an attestation by delegation.
    * @param payload The payload containing the revocation details.
    */
@@ -105,6 +129,33 @@ class EASService {
     } catch (error: any) {
       console.error('Revocation failed:', error);
       throw new Error(`Revocation failed: ${error.message}`);
+    }
+  }
+
+  /**
+   * Attests by delegation.
+   * @param attestationPayload The payload containing the attestation details.
+   */
+  public async attestByDelegation(
+    attestationPayload: AttestPayload
+  ): Promise<void> {
+    if (!this.eas) {
+      throw new Error('EAS is not initialized');
+    }
+
+    const convertedPayload = this.convertStringsToBigInts(
+      attestationPayload
+    ) as DelegatedAttestationRequest;
+    const attestationRequest =
+      EASService.prepareAttestationRequest(convertedPayload);
+
+    try {
+      const tx = await this.eas.attestByDelegation(attestationRequest);
+      await tx.wait();
+      console.log('Attestation successful:', tx);
+    } catch (error: any) {
+      console.error('Attestation failed:', error);
+      throw new Error(`Attestation failed: ${error.message}`);
     }
   }
 

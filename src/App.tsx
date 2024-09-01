@@ -81,7 +81,7 @@ const App: React.FC = () => {
                     <Route path="/" element={<Navigate to="/identifiers" />} />
                     <Route path="/identifiers" element={<Identifiers />} />
                     <Route
-                      path="identifiers/:providers/attestation"
+                      path="identifiers/:provider/attestation"
                       element={<Attestation />}
                     />
                     <Route path="/permissions" element={<Permissions />} />
