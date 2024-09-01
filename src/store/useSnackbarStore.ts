@@ -13,6 +13,9 @@ interface SnackbarOptions {
   severity?: 'success' | 'error' | 'warning' | 'info';
   duration?: number;
   position?: SnackbarOrigin;
+  icon?: React.ReactNode;
+  linkText?: string;
+  linkUrl?: string;
 }
 
 const useSnackbarStore = create<SnackbarState>((set) => ({

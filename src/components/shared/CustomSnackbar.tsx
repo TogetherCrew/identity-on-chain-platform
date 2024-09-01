@@ -1,5 +1,4 @@
-import { Snackbar, Alert } from '@mui/material';
-
+import { Snackbar, Alert, AlertTitle, Link, Box } from '@mui/material';
 import useSnackbarStore from '../../store/useSnackbarStore';
 
 /**
@@ -16,18 +15,31 @@ export const CustomSnackbar = (): JSX.Element => {
       anchorOrigin={
         options?.position || { vertical: 'bottom', horizontal: 'right' }
       }
-      autoHideDuration={options?.duration}
+      autoHideDuration={options?.duration ?? 3000}
       open={open}
       onClose={closeSnackbar}
     >
       <Alert
         severity={options?.severity || 'info'}
-        sx={{ width: '100%' }}
+        sx={{ width: '100%', display: 'flex', alignItems: 'center' }}
         variant="filled"
         onClose={closeSnackbar}
+        icon={options?.icon}
+        aria-live="assertive"
       >
-        {message}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box>
+            <AlertTitle>{message}</AlertTitle>
+            {options?.linkText && options?.linkUrl && (
+              <Link href={options.linkUrl} color="inherit" underline="always">
+                {options.linkText}
+              </Link>
+            )}
+          </Box>
+        </Box>
       </Alert>
     </Snackbar>
   );
 };
+
+export default CustomSnackbar;
