@@ -5,7 +5,7 @@ import {
 } from '@ethereum-attestation-service/eas-sdk';
 
 import * as LitJsSdk from '@lit-protocol/lit-node-client';
-import {  SessionSigsMap } from '@lit-protocol/types';
+import { EncryptToJsonPayload, SessionSigsMap } from '@lit-protocol/types';
 import { publicClient } from './client';
 import sepoliaChain from '../../utils/contracts/eas/sepoliaChain.json';
 
