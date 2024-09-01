@@ -1,5 +1,5 @@
-import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { Box, Typography } from '@mui/material';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 
 export function Login() {
   return (

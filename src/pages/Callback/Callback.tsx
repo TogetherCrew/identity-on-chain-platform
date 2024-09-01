@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { jwtDecode } from 'jwt-decode';
 import { Backdrop, CircularProgress } from '@mui/material';
+import { jwtDecode } from 'jwt-decode';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 interface DecodedJwt {
   exp: number;

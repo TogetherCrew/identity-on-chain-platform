@@ -1,8 +1,10 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
-import SidebarApp from './SidebarApp';
+import { describe, expect, it, vi } from 'vitest';
+
 import { SIDEBAR_MENU } from '../../libs/constants';
+
+import SidebarApp from './SidebarApp';
 
 // Mock the constants
 vi.mock('../../libs/constants', () => ({

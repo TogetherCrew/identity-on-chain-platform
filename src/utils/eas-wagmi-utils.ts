@@ -1,12 +1,12 @@
 // import { type PublicClient, type WalletClient } from '@wagmi/core';
+import { useEffect, useState } from 'react';
 import {
   BrowserProvider,
   FallbackProvider,
   JsonRpcProvider,
   JsonRpcSigner,
 } from 'ethers';
-import { PublicClient, WalletClient, type HttpTransport } from 'viem';
-import { useEffect, useState } from 'react';
+import { type HttpTransport, PublicClient, WalletClient } from 'viem';
 // import type { JsonRpcProvider, JsonRpcSigner } from '@ethersproject/providers';
 import { usePublicClient, useWalletClient } from 'wagmi';
 

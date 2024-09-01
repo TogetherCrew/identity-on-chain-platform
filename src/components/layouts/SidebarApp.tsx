@@ -1,15 +1,16 @@
 import {
+  Box,
+  Divider,
   Drawer,
   List,
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Box,
   Toolbar,
-  Divider,
   Typography,
 } from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
+
 import { DRAWER_WIDTH, SIDEBAR_MENU } from '../../libs/constants';
 
 function SidebarApp() {

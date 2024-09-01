@@ -1,81 +1,98 @@
+/* eslint-disable react/destructuring-assignment */
 import React from 'react';
-import { Stepper, Step, StepLabel, StepIconProps, StepConnector, styled, stepConnectorClasses } from '@mui/material';
 import Check from '@mui/icons-material/Check';
+import {
+  Step,
+  StepConnector,
+  stepConnectorClasses,
+  StepIconProps,
+  StepLabel,
+  Stepper,
+  styled,
+} from '@mui/material';
 
-interface Step {
-    label: string;
+interface IStep {
+  label: string;
 }
 
 interface StepperComponentProps {
-    steps: Step[];
-    activeStep: number;
+  steps: IStep[];
+  activeStep: number;
 }
 
+const gradientBackground = 'linear-gradient(136deg, #4200FF 0%, #4200FF 100%)';
+
 const CustomConnector = styled(StepConnector)(({ theme }) => ({
-    [`&.${stepConnectorClasses.alternativeLabel}`]: {
-        top: 22,
-    },
-    [`&.${stepConnectorClasses.active}`]: {
-        [`& .${stepConnectorClasses.line}`]: {
-            backgroundImage: 'linear-gradient( 95deg, #4200FF 0%, #4200FF 50%, #4200FF 100%)',
-        },
-    },
-    [`&.${stepConnectorClasses.completed}`]: {
-        [`& .${stepConnectorClasses.line}`]: {
-            backgroundImage: 'linear-gradient( 95deg, #4200FF 0%, #4200FF 50%, #4200FF 100%)',
-        },
-    },
+  [`&.${stepConnectorClasses.alternativeLabel}`]: {
+    top: 22,
+  },
+  [`&.${stepConnectorClasses.active}`]: {
     [`& .${stepConnectorClasses.line}`]: {
-        height: 3,
-        border: 0,
-        backgroundColor: theme.palette.mode === 'dark' ? theme.palette.grey[800] : '#eaeaf0',
-        borderRadius: 1,
+      backgroundImage: gradientBackground,
     },
+  },
+  [`&.${stepConnectorClasses.completed}`]: {
+    [`& .${stepConnectorClasses.line}`]: {
+      backgroundImage: gradientBackground,
+    },
+  },
+  [`& .${stepConnectorClasses.line}`]: {
+    height: 3,
+    border: 0,
+    backgroundColor:
+      theme.palette.mode === 'dark' ? theme.palette.grey[800] : '#eaeaf0',
+    borderRadius: 1,
+  },
 }));
 
 const CustomStepIconRoot = styled('div')<{
-    ownerState: { completed?: boolean; active?: boolean };
+  ownerState: { completed?: boolean; active?: boolean };
 }>(({ theme, ownerState }) => ({
-    backgroundColor: theme.palette.mode === 'dark' ? theme.palette.grey[700] : '#ccc',
-    zIndex: 1,
-    color: '#fff',
-    width: 50,
-    height: 50,
-    display: 'flex',
-    borderRadius: '50%',
-    justifyContent: 'center',
-    alignItems: 'center',
-    ...(ownerState.active && {
-        backgroundImage:
-            'linear-gradient( 136deg, #4200FF 0%, #4200FF 50%, #4200FF 100%)',
-        boxShadow: '0 4px 10px 0 rgba(0,0,0,.25)',
-    }),
-    ...(ownerState.completed && {
-        backgroundImage:
-            'linear-gradient( 136deg, #4200FF 0%, #4200FF 50%, #4200FF 100%)',
-    }),
+  backgroundColor:
+    theme.palette.mode === 'dark' ? theme.palette.grey[700] : '#ccc',
+  zIndex: 1,
+  color: '#fff',
+  width: 50,
+  height: 50,
+  display: 'flex',
+  borderRadius: '50%',
+  justifyContent: 'center',
+  alignItems: 'center',
+  ...(ownerState.active && {
+    backgroundImage: gradientBackground,
+    boxShadow: '0 4px 10px 0 rgba(0,0,0,.25)',
+  }),
+  ...(ownerState.completed && {
+    backgroundImage: gradientBackground,
+  }),
 }));
 
-function CustomStepIcon(props: StepIconProps) {
-    const { active, completed, className } = props;
+const CustomStepIcon: React.FC<StepIconProps> = ({
+  active,
+  completed,
+  className,
+  icon,
+}) => (
+  <CustomStepIconRoot ownerState={{ completed, active }} className={className}>
+    {completed ? <Check /> : <div>{icon}</div>}
+  </CustomStepIconRoot>
+);
 
-    return (
-        <CustomStepIconRoot ownerState={{ completed, active }} className={className}>
-            {completed ? <Check /> : <div>{props.icon}</div>}
-        </CustomStepIconRoot>
-    );
-}
+const StepperComponent: React.FC<StepperComponentProps> = ({
+  steps,
+  activeStep,
+}) => (
+  <Stepper
+    alternativeLabel
+    activeStep={activeStep}
+    connector={<CustomConnector />}
+  >
+    {steps.map((step) => (
+      <Step key={step.label}>
+        <StepLabel StepIconComponent={CustomStepIcon}>{step.label}</StepLabel>
+      </Step>
+    ))}
+  </Stepper>
+);
 
-const StepperComponent: React.FC<StepperComponentProps> = ({ steps, activeStep }) => {
-    return (
-        <Stepper alternativeLabel activeStep={activeStep} connector={<CustomConnector />}>
-            {steps.map((step, index) => (
-                <Step key={index}>
-                    <StepLabel StepIconComponent={CustomStepIcon}>{step.label}</StepLabel>
-                </Step>
-            ))}
-        </Stepper>
-    );
-};
-
-export default StepperComponent;
+export default React.memo(StepperComponent);

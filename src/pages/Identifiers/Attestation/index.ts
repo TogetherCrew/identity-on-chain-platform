@@ -1,3 +1,3 @@
-import { Attestation } from './Attestation';
+import Attestation from './Attestation';
 
 export default Attestation;

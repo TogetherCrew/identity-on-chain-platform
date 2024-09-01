@@ -1,3 +1,3 @@
-import { Identifiers } from './Identifiers';
+import Identifiers from './Identifiers';
 
 export default Identifiers;

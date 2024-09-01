@@ -1,7 +1,11 @@
+import { Provider } from '../../../enums';
 import { baseURL } from '..';
-import { PlatformAuthenticationParams } from '@/interfaces';
 
-export const platformAuthentication = async ({
+interface PlatformAuthenticationParams {
+  platformType: Provider;
+}
+
+export const platformAuthentication = ({
   platformType,
 }: PlatformAuthenticationParams) => {
   window.location.replace(`${baseURL}auth/${platformType}/authenticate`);

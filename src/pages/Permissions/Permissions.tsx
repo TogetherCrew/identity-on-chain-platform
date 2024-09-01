@@ -2,14 +2,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useMemo, useState } from 'react';
 import {
-  useReadContract,
-  useReadContracts,
-  useWriteContract,
-  useWaitForTransactionReceipt,
-  useAccount,
-} from 'wagmi';
-import { Address, Abi } from 'viem';
-import {
   Alert,
   Backdrop,
   Box,
@@ -19,15 +11,25 @@ import {
   Typography,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { Abi, Address } from 'viem';
+import {
+  useAccount,
+  useReadContract,
+  useReadContracts,
+  useWaitForTransactionReceipt,
+  useWriteContract,
+} from 'wagmi';
+
+import CustomTable, {
+  AccessData,
+  Platform,
+} from '../../components/shared/CustomTable';
+import { IAttestation } from '../../interfaces';
+import { decodeAttestationData } from '../../libs/oci';
 import { useGetAttestations } from '../../services/eas/query';
+import useSnackbarStore from '../../store/useSnackbarStore';
 import sepoliaChainAppConctract from '../../utils/contracts/app/sepoliaChain.json';
 import sepoliaChainOidonctract from '../../utils/contracts/oid/sepoliaChain.json';
-import { decodeAttestationData, IAttestation } from '../../libs/oci';
-import CustomTable, {
-  Platform,
-  AccessData,
-} from '../../components/shared/CustomTable';
-import useSnackbarStore from '../../store/useSnackbarStore';
 
 export function Permissions() {
   const { showSnackbar } = useSnackbarStore();
