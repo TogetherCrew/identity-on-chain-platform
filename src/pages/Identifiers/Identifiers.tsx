@@ -99,6 +99,10 @@ export default function Identifiers() {
         attestations
       );
       setUserIdentifiers(resolvedIdentifiers);
+    } else {
+      setUserIdentifiers((prev) =>
+        prev.map((identifier) => ({ ...identifier, verified: false }))
+      );
     }
   }, [attestations]);
 
