@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { gql } from 'graphql-request';
 import { Address } from 'viem';
 
-import { IAttestation } from '../../libs/oci';
+import { IAttestation } from '../../interfaces';
 import { EAS_SCHEMA_ID } from '../../utils/contracts/eas/constants';
 import { ATTESTER_ADDRESS, graphQLClient } from '.';
 

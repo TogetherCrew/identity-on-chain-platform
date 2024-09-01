@@ -24,7 +24,8 @@ import CustomTable, {
   AccessData,
   Platform,
 } from '../../components/shared/CustomTable';
-import { decodeAttestationData, IAttestation } from '../../libs/oci';
+import { IAttestation } from '../../interfaces';
+import { decodeAttestationData } from '../../libs/oci';
 import { useGetAttestations } from '../../services/eas/query';
 import useSnackbarStore from '../../store/useSnackbarStore';
 import sepoliaChainAppConctract from '../../utils/contracts/app/sepoliaChain.json';
