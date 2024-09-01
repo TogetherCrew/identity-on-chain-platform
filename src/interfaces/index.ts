@@ -10,6 +10,21 @@ export interface MenuItem {
   children?: MenuItem[];
 }
 
+export interface IAttestation {
+  uid: `0x${string}`;
+  schema: `0x${string}`;
+  refUID: `0x${string}`;
+  time: bigint;
+  expirationTime: bigint;
+  revocationTime: bigint;
+  recipient: `0x${string}`;
+  attester: `0x${string}`;
+  revocable: boolean;
+  data: `0x${string}`;
+  id?: string;
+  provider?: string;
+}
+
 export interface PlatformAuthenticationParams {
   platformType: 'DISCORD' | 'GOOGLE';
 }

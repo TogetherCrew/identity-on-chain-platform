@@ -49,5 +49,6 @@ module.exports = {
     '@typescript-eslint/no-exp': 'off',
     'react/no-array': 'off',
     'react/function-component-definition': 'off',
+    'react-hooks/exhaustive-deps': 'off',
   },
 };

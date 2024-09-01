@@ -6,6 +6,15 @@ const theme = createTheme({
       main: '#4200FF',
     },
   },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          textTransform: 'none',
+        },
+      },
+    },
+  },
   typography: {
     fontFamily: ['DM Sans', 'sans-serif'].join(','),
   },
