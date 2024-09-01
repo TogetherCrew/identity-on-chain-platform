@@ -71,16 +71,18 @@ const StepTwo: React.FC<StepTwoProps> = ({
       <Box>
         <Button
           variant="contained"
-          startIcon={<FaLink />}
+          startIcon={
+            isPending ? (
+              <CircularProgress color="inherit" size={20} />
+            ) : (
+              <FaLink />
+            )
+          }
           sx={{ mt: 2, px: 4 }}
           onClick={handleGenerateSignedDelegation}
           disabled={isPending}
         >
-          {isPending ? (
-            <CircularProgress size={24} color="inherit" />
-          ) : (
-            'Get Signed Delegated Attestation'
-          )}
+          {isPending ? 'Processing...' : 'Get Signed Delegated Attestation'}
         </Button>
       </Box>
     </Stack>

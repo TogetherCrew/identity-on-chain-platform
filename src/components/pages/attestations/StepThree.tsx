@@ -72,12 +72,18 @@ const StepThree: React.FC<StepThreeProps> = ({ attestedSignutare }) => {
       <Box>
         <Button
           variant="contained"
-          startIcon={isLoading ? <CircularProgress size={20} /> : <FaLink />}
+          startIcon={
+            isLoading ? (
+              <CircularProgress color="inherit" size={20} />
+            ) : (
+              <FaLink />
+            )
+          }
           sx={{ mt: 2, px: 4 }}
           onClick={handleAttestByDelegation}
           disabled={isLoading}
         >
-          {isLoading ? 'Signing...' : 'Sign Delegated Attestation'}
+          {isLoading ? 'Processing...' : 'Sign Delegated Attestation'}
         </Button>
       </Box>
       <Typography variant="caption">

@@ -31,6 +31,7 @@ import {
   useRevokeIdentifierMutation,
 } from '../../services/api/eas/query';
 import EASService from '../../services/eas.service';
+import useSnackbarStore from '../../store/useSnackbarStore';
 import sepoliaChain from '../../utils/contracts/eas/sepoliaChain.json';
 import { useSigner } from '../../utils/eas-wagmi-utils';
 
@@ -44,6 +45,7 @@ interface Identifier {
 
 export default function Identifiers() {
   const navigate = useNavigate();
+  const { showSnackbar } = useSnackbarStore();
   const [userIdentifiers, setUserIdentifiers] = useState<Identifier[]>([
     { name: 'Discord', icon: FaDiscord, verified: false, uid: '' },
     { name: 'Google', icon: FaGoogle, verified: false, uid: '' },
@@ -52,6 +54,7 @@ export default function Identifiers() {
     {}
   );
   const [loading, setLoading] = useState<{ [key: string]: boolean }>({});
+  const [revoking, setRevoking] = useState<{ [key: string]: boolean }>({});
 
   const signer = useSigner();
 
@@ -64,6 +67,7 @@ export default function Identifiers() {
     isLoading: attestationsLoading,
     error,
     chainId,
+    refetch,
   } = useAttestations();
   const { mutate: mutateRevoke } = useRevokeIdentifierMutation();
 
@@ -98,16 +102,31 @@ export default function Identifiers() {
     }
   }, [attestations]);
 
-  const revokeDelegation = async (response: RevokePayload) => {
+  const revokeDelegation = async (response: RevokePayload, uid: string) => {
     if (!easService) {
       throw new Error('EAS service not initialized');
     }
 
+    setRevoking((prev) => ({ ...prev, [uid]: true }));
+
     try {
       await easService.revokeByDelegation(response);
-      console.log('Revocation successful:');
+
+      showSnackbar('Attestation Revoke successfully completed.', {
+        severity: 'success',
+      });
+
+      await refetch();
     } catch (error) {
       console.error('Error revoking identifier:', error);
+      showSnackbar(
+        'Failed to complete the attestation revoke. Please try again.',
+        {
+          severity: 'error',
+        }
+      );
+    } finally {
+      setRevoking((prev) => ({ ...prev, [uid]: false }));
     }
   };
 
@@ -125,7 +144,7 @@ export default function Identifiers() {
         { uid, siweJwt, chainId },
         {
           onSuccess: (response) => {
-            revokeDelegation(response.data as RevokePayload);
+            revokeDelegation(response.data as RevokePayload, uid);
           },
           onError: (error) => {
             console.error('Error revoking identifier:', error);
@@ -138,8 +157,6 @@ export default function Identifiers() {
 
   const handleReveal = useCallback(
     (identifier: Identifier) => {
-      console.log('Identifier:', identifier);
-
       const siweJwt = localStorage.getItem('OCI_TOKEN');
 
       if (!siweJwt) throw new Error('OCI SIWE token not found');
@@ -160,7 +177,6 @@ export default function Identifiers() {
         },
         {
           onSuccess: (response) => {
-            console.log('Decrypted secret:', response);
             setUserIdentifiers((prev) =>
               prev.map((id) => {
                 if (id.uid === identifier.uid) {
@@ -195,6 +211,19 @@ export default function Identifiers() {
 
   const handleTooltipClose = (uid: string) => {
     setOpenTooltips((prev) => ({ ...prev, [uid]: false }));
+  };
+
+  const renderButtonContent = (identifier: Identifier) => {
+    if (revoking[identifier.uid]) {
+      return (
+        <>
+          <CircularProgress color="inherit" size={16} sx={{ mr: 1 }} />
+          Revoking...
+        </>
+      );
+    }
+
+    return identifier.verified ? 'Revoke' : 'Connect';
   };
 
   if (attestationsLoading) {
@@ -305,8 +334,9 @@ export default function Identifiers() {
                     ? () => handleRevokeAttestation(identifier.uid)
                     : () => handleConnectAttestation(identifier.name)
                 }
+                disabled={revoking[identifier.uid]}
               >
-                {identifier.verified ? 'Revoke' : 'Connect'}
+                {renderButtonContent(identifier)}
               </Button>
             </ListItemSecondaryAction>
           </ListItem>
