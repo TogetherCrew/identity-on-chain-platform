@@ -15,23 +15,19 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { isConnected } = useAccount();
 
   useEffect(() => {
-    if (!isConnected) {
-      setIsAuthenticated(false);
-      localStorage.removeItem('OCI_TOKEN');
-    }
-  }, [isConnected]);
-
-  useEffect(() => {
-    const checkAuthStatus = async () => {
-      const token = localStorage.getItem('OCI_TOKEN');
-      if (token) {
-        setIsAuthenticated(true);
+    const checkAuthStatus = () => {
+      if (isConnected) {
+        const token = localStorage.getItem('OCI_TOKEN');
+        setIsAuthenticated(!!token);
+      } else {
+        setIsAuthenticated(false);
+        localStorage.removeItem('OCI_TOKEN');
       }
       setLoading(false);
     };
 
     checkAuthStatus();
-  }, []);
+  }, [isConnected]);
 
   if (loading) {
     return (
