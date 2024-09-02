@@ -9,6 +9,9 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
+import { FaDiscord, FaGoogle } from 'react-icons/fa';
+
+import { capitalize } from '../../utils/helper';
 
 import AccessControlButton from './AccessControlButton';
 
@@ -64,8 +67,14 @@ const CustomTable: React.FC<CustomTableProps<AccessData>> = ({
             {xcolumns.map((platform, index) => (
               <TableCell key={index} align="center" sx={{ padding: 1 }}>
                 <div className="flex flex-row space-x-1.5 items-center justify-center">
-                  <Avatar>{platform.provider[0].toUpperCase()}</Avatar>
-                  <Typography>{platform.provider}</Typography>
+                  <Avatar>
+                    {platform.provider === 'discord' ? (
+                      <FaDiscord size={24} />
+                    ) : (
+                      <FaGoogle size={24} />
+                    )}
+                  </Avatar>
+                  <Typography>{capitalize(platform.provider)}</Typography>
                 </div>
               </TableCell>
             ))}
