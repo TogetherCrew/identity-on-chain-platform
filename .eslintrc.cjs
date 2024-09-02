@@ -51,5 +51,6 @@ module.exports = {
     'react/function-component-definition': 'off',
     'react-hooks/exhaustive-deps': 'off',
     'react/prop-types': 'off',
+    'react/jsx-props-no-spreading': 'off',
   },
 };
