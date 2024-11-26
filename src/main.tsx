@@ -12,7 +12,7 @@ import App from './App';
 const projectID = import.meta.env.VITE_PROJECT_ID;
 
 const config = getDefaultConfig({
-  appName: 'RainbowKit demo',
+  appName: 'Identity on chain platform',
   projectId: projectID,
   chains: [optimismSepolia, baseSepolia],
   ssr: false,
