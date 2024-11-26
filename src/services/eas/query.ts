@@ -1,18 +1,20 @@
 import { useQuery } from '@tanstack/react-query';
-import { gql } from 'graphql-request';
+import { gql, GraphQLClient } from 'graphql-request';
 import { Address } from 'viem';
 
 import { IAttestation } from '../../interfaces';
 import { EAS_SCHEMA_ID } from '../../utils/contracts/eas/constants';
-import { ATTESTER_ADDRESS, graphQLClient } from '.';
+import { ATTESTER_ADDRESS, chainIdToGraphQLEndpoint } from '.';
 
 interface AttestationsResponse {
   attestations: IAttestation[];
 }
 
-export const useGetAttestations = (recipient: Address) => {
+export const useGetAttestations = (recipient: Address, chainId: number) => {
+  const graphqlClient = new GraphQLClient(chainIdToGraphQLEndpoint[chainId]);
+
   return useQuery<IAttestation[]>({
-    queryKey: ['getAttestations', recipient],
+    queryKey: ['getAttestations', recipient, chainId],
     queryFn: async () => {
       const query = gql`
         query Attestations(
@@ -36,6 +38,7 @@ export const useGetAttestations = (recipient: Address) => {
             revocationTime
             expirationTime
             data
+            decodedDataJson
           }
         }
       `;
@@ -43,16 +46,16 @@ export const useGetAttestations = (recipient: Address) => {
       const variables = {
         attester: ATTESTER_ADDRESS,
         recipient,
-        schemaId: EAS_SCHEMA_ID,
+        schemaId: EAS_SCHEMA_ID[chainId],
       };
 
-      const attestedResults = await graphQLClient.request<AttestationsResponse>(
+      const attestedResults = await graphqlClient.request<AttestationsResponse>(
         query,
         variables
       );
 
       return attestedResults.attestations;
     },
-    enabled: !!recipient,
+    enabled: !!recipient || !chainId,
   });
 };

@@ -9,11 +9,12 @@ import {
 import { FaLink } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { Address } from 'viem';
+import { useAccount } from 'wagmi';
 
 import { AttestPayload } from '../../../interfaces';
 import EASService from '../../../services/eas.service';
 import useSnackbarStore from '../../../store/useSnackbarStore';
-import sepoliaChain from '../../../utils/contracts/eas/sepoliaChain.json';
+import { contracts } from '../../../utils/contracts/eas/contracts';
 import { useSigner } from '../../../utils/eas-wagmi-utils';
 
 interface StepThreeProps {
@@ -24,10 +25,15 @@ const StepThree: React.FC<StepThreeProps> = ({ attestedSignutare }) => {
   const { showSnackbar } = useSnackbarStore();
   const navigate = useNavigate();
   const signer = useSigner();
+  const { chainId } = useAccount();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
+  const easContractAddress = contracts.find(
+    (contract) => contract.chainId === chainId
+  )?.easContractAddress;
+
   const easService = signer
-    ? new EASService(sepoliaChain.easContractAddress as Address, signer)
+    ? new EASService(easContractAddress as Address, signer)
     : null;
 
   const handleAttestByDelegation = async () => {

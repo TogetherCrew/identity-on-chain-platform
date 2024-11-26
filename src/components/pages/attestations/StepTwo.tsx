@@ -7,6 +7,7 @@ import {
   Typography,
 } from '@mui/material';
 import { FaLink } from 'react-icons/fa6';
+import { useAccount } from 'wagmi';
 
 import { Provider } from '../../../enums';
 import { AttestPayload } from '../../../interfaces';
@@ -22,7 +23,10 @@ const StepTwo: React.FC<StepTwoProps> = ({
   provider,
   handlePrepareAttestation,
 }) => {
-  const { mutate: mutateIdentifier, isPending } = useLinkIdentifierMutation();
+  const { chainId } = useAccount();
+  const { mutate: mutateIdentifier, isPending } = useLinkIdentifierMutation(
+    chainId as number
+  );
 
   const handleGenerateSignedDelegation = async () => {
     const siweJwt = localStorage.getItem('OCI_TOKEN');

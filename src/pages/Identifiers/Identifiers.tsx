@@ -23,6 +23,7 @@ import clsx from 'clsx';
 import { FaDiscord, FaGoogle } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { Address } from 'viem';
+import { useAccount } from 'wagmi';
 
 import useAttestations from '../../hooks/useAttestations';
 import { IAttestation, RevokePayload } from '../../interfaces';
@@ -32,7 +33,7 @@ import {
 } from '../../services/api/eas/query';
 import EASService from '../../services/eas.service';
 import useSnackbarStore from '../../store/useSnackbarStore';
-import sepoliaChain from '../../utils/contracts/eas/sepoliaChain.json';
+import { contracts } from '../../utils/contracts/eas/contracts';
 import { useSigner } from '../../utils/eas-wagmi-utils';
 
 interface Identifier {
@@ -45,6 +46,7 @@ interface Identifier {
 
 export default function Identifiers() {
   const navigate = useNavigate();
+  const { chainId: chainIdNetwork } = useAccount();
   const { showSnackbar } = useSnackbarStore();
   const [userIdentifiers, setUserIdentifiers] = useState<Identifier[]>([
     { name: 'Discord', icon: FaDiscord, verified: false, uid: '' },
@@ -58,8 +60,12 @@ export default function Identifiers() {
 
   const signer = useSigner();
 
+  const easContractAddress = contracts.find(
+    (contract) => contract.chainId === chainIdNetwork
+  )?.easContractAddress;
+
   const easService = signer
-    ? new EASService(sepoliaChain.easContractAddress as Address, signer)
+    ? new EASService(easContractAddress as Address, signer)
     : null;
 
   const {

@@ -6,10 +6,13 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { getAddress } from 'viem';
 import { createSiweMessage } from 'viem/siwe';
+import { useAccount } from 'wagmi';
 
 import { api } from '../services/api';
 
 const useSiweAuth = () => {
+  const { chainId } = useAccount();
+
   const navigate = useNavigate();
   const [authStatus, setAuthStatus] =
     useState<AuthenticationStatus>('unauthenticated');
@@ -19,10 +22,10 @@ const useSiweAuth = () => {
       const { data } = await api.get('auth/siwe/nonce');
       return data.nonce;
     },
-    createMessage: ({ nonce, address, chainId }) => {
+    createMessage: ({ nonce, address }) => {
       return createSiweMessage({
         address: getAddress(address),
-        chainId,
+        chainId: chainId as number,
         domain: window.location.host,
         nonce,
         uri: window.location.origin,
@@ -35,7 +38,7 @@ const useSiweAuth = () => {
       const { data } = await api.post('auth/siwe/verify', {
         message,
         signature,
-        chainId: 11155111,
+        chainId: chainId as number,
       });
 
       if (data?.jwt) {

@@ -40,7 +40,6 @@ export const LitProvider = ({ litNetwork, children }: ILitProvider) => {
       try {
         await client.connect();
         setConnected(true);
-        console.log(`Connected to Lit Network: ${litNetwork}`);
       } catch (error) {
         console.error('Failed to connect to Lit Network:', error);
         setConnected(false);

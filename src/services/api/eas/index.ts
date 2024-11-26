@@ -21,7 +21,7 @@ export interface DecryptAttestationsSecretParams {
 export const linkIdentifier = async ({
   siweJwt,
   anyJwt,
-  chainId = 11155111,
+  chainId,
 }: LinkIdentifierParams) => {
   return api.post('/eas/sign-delegated-attestation', {
     siweJwt,

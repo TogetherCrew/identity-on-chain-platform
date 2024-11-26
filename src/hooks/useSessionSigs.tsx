@@ -56,7 +56,7 @@ function useSessionSigs() {
           litNodeClient,
         });
         const authSig = generateAuthSig({ signer, toSign });
-        console.log('authSig', authSig);
+
         return authSig;
       };
 
@@ -71,7 +71,6 @@ function useSessionSigs() {
         ],
         authNeededCallback,
       });
-      console.log('sessionSigs', sessionSigs);
       setSessionSigs(sessionSigs);
     },
     []

@@ -43,8 +43,6 @@ apiInstance.interceptors.response.use(
   (error) => {
     const navigate = useNavigate();
     const { showSnackbar } = useSnackbarStore();
-    console.log(error.response, 'test');
-
     if (error.response?.status === 400) {
       showSnackbar('Bad Request', {
         severity: 'error',

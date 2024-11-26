@@ -22,7 +22,6 @@ function AccountPopover() {
   };
 
   const handleLogout = () => {
-    console.log('User logged out');
     handleClose();
   };
 
