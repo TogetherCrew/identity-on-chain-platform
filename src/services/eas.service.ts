@@ -139,6 +139,8 @@ class EASService {
   public async attestByDelegation(
     attestationPayload: AttestPayload
   ): Promise<void> {
+    console.log('attestationPayload', attestationPayload);
+
     if (!this.eas) {
       throw new Error('EAS is not initialized');
     }
@@ -149,6 +151,7 @@ class EASService {
     const attestationRequest =
       EASService.prepareAttestationRequest(convertedPayload);
 
+    console.log('attestationRequest', attestationRequest);
     try {
       const tx = await this.eas.attestByDelegation(attestationRequest);
       await tx.wait();
