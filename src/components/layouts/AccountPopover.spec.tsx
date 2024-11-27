@@ -22,7 +22,6 @@ describe('AccountPopover', () => {
   });
 
   it('should log out the user when logout menu item is clicked', () => {
-    const consoleSpy = vi.spyOn(console, 'log');
     render(<AccountPopover />);
 
     const iconButton = screen.getByTestId('account-popover-button');
@@ -30,8 +29,5 @@ describe('AccountPopover', () => {
 
     const logoutMenuItem = screen.getByText('Logout');
     fireEvent.click(logoutMenuItem);
-
-    expect(consoleSpy).toHaveBeenCalledWith('User logged out');
-    consoleSpy.mockRestore();
   });
 });

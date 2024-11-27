@@ -22,6 +22,7 @@ export interface IAttestation {
   revocable: boolean;
   data: `0x${string}`;
   id?: string;
+  key?: string;
   provider?: string;
 }
 

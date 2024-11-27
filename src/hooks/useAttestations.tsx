@@ -28,7 +28,7 @@ const useAttestations = () => {
     error,
     isLoading,
     refetch,
-  } = useGetAttestations(address as `0x${string}`);
+  } = useGetAttestations(address as `0x${string}`, chainId as number);
 
   const [attestations, setAttestations] = useState<ProcessedAttestation[]>([]);
 

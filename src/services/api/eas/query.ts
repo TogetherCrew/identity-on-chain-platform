@@ -9,13 +9,9 @@ import {
   RevokeIdentifierParams,
 } from '.';
 
-export const useLinkIdentifierMutation = () => {
+export const useLinkIdentifierMutation = (chainId: number) => {
   return useMutation({
-    mutationFn: async ({
-      siweJwt,
-      anyJwt,
-      chainId = 11155111,
-    }: LinkIdentifierParams) => {
+    mutationFn: async ({ siweJwt, anyJwt }: LinkIdentifierParams) => {
       return linkIdentifier({
         siweJwt,
         anyJwt,

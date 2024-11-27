@@ -28,13 +28,21 @@ import { IAttestation } from '../../interfaces';
 import { decodeAttestationData } from '../../libs/oci';
 import { useGetAttestations } from '../../services/eas/query';
 import useSnackbarStore from '../../store/useSnackbarStore';
-import sepoliaChainAppConctract from '../../utils/contracts/app/sepoliaChain.json';
-import sepoliaChainOidonctract from '../../utils/contracts/oid/sepoliaChain.json';
+import { appContracts } from '../../utils/contracts/app/contracts';
+import { oidContracts } from '../../utils/contracts/oid/contracts';
 
 export function Permissions() {
   const { showSnackbar } = useSnackbarStore();
-  const { address } = useAccount();
+  const { address, chainId } = useAccount();
   const navigate = useNavigate();
+
+  const appContract = appContracts.find(
+    (contract) => contract.chainId === chainId
+  );
+  const oidContract = oidContracts.find(
+    (contract) => contract.chainId === chainId
+  );
+
   const {
     data: transactionHash,
     writeContract,
@@ -49,7 +57,8 @@ export function Permissions() {
     data: attestationsResponse,
     isLoading: isLoadingAttestations,
     refetch: refetchAttestations,
-  } = useGetAttestations(address as `0x${string}`);
+  } = useGetAttestations(address as Address, chainId as number);
+
   const [applicationsArgs] = useState<[number, number]>([0, 10]);
   const [attestations, setAttestations] = useState<
     (IAttestation & { provider?: string; id?: string })[]
@@ -64,8 +73,8 @@ export function Permissions() {
     error,
     refetch: refetchApplications,
   } = useReadContract({
-    abi: sepoliaChainAppConctract.appContractABI,
-    address: sepoliaChainAppConctract.appContractAddress as Address,
+    abi: appContract?.abi,
+    address: appContract?.address as Address,
     functionName: 'getApplications',
     args: applicationsArgs,
   });
@@ -88,15 +97,13 @@ export function Permissions() {
       const attestationsData = attestationsResponse.map((attestation) => {
         const decodedData = decodeAttestationData(attestation.data);
 
-        const providerData = decodedData.find(
-          (provider) => provider.name === 'provider'
-        );
+        const keyData = decodedData.find((field) => field.name === 'key');
 
         return {
           ...attestation,
-          provider:
-            typeof providerData?.value.value === 'string'
-              ? providerData.value.value
+          key:
+            typeof keyData?.value.value === 'string'
+              ? keyData.value.value
               : undefined,
           decodedData,
         };
@@ -113,10 +120,10 @@ export function Permissions() {
       attestations.flatMap(
         (attestation) =>
           applications?.map((application) => ({
-            abi: sepoliaChainOidonctract.oidContractAbi as Abi,
-            address: sepoliaChainOidonctract.oidContractAddress as Address,
+            abi: oidContract?.abi as Abi,
+            address: oidContract?.address as Address,
             functionName: 'hasPermission',
-            args: [attestation.id, application.account],
+            args: [attestation.key, application.account],
           })) || []
       ),
     [attestations, applications]
@@ -177,8 +184,8 @@ export function Permissions() {
   const handleGrantOrRevokeAccess = (application: any, platform: any) => {
     writeContract(
       {
-        abi: sepoliaChainOidonctract.oidContractAbi as Abi,
-        address: sepoliaChainOidonctract.oidContractAddress as Address,
+        abi: oidContract?.abi as Abi,
+        address: oidContract?.address as Address,
         functionName: application.hasPermission
           ? 'revokePermission'
           : 'grantPermission',
