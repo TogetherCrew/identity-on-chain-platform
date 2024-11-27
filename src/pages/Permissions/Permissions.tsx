@@ -98,9 +98,14 @@ export function Permissions() {
         const decodedData = decodeAttestationData(attestation.data);
 
         const keyData = decodedData.find((field) => field.name === 'key');
+        const provider = decodedData.find((field) => field.name === 'provider');
 
         return {
           ...attestation,
+          provider:
+            typeof provider?.value.value === 'string'
+              ? provider.value.value
+              : undefined,
           key:
             typeof keyData?.value.value === 'string'
               ? keyData.value.value
