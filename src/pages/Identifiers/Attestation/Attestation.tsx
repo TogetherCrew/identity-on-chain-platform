@@ -13,7 +13,7 @@ import { AttestPayload } from '../../../interfaces';
 const steps = [
   { label: 'Authenticate' },
   { label: 'Attest' },
-  { label: 'Transact' },
+  { label: 'Complete' },
 ];
 
 export default function Attestation() {
@@ -53,8 +53,8 @@ export default function Attestation() {
       >
         <Alert severity="info" sx={{ mb: 4 }}>
           <AlertTitle>Link Your Social Media Accounts</AlertTitle>
-          Attest your social media accounts by linking them to your wallet
-          address. This allows you to prove ownership over these accounts.
+          Attest the social media accounts you own by linking them to your
+          wallet address. This allows you to prove ownership.
         </Alert>
         <CustomStepper steps={steps} activeStep={activeStep} />
 
