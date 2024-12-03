@@ -23,6 +23,7 @@ interface ProcessedAttestation {
 
 const useAttestations = () => {
   const { address, chainId } = useAccount();
+
   const {
     data: attestationsResponse,
     error,

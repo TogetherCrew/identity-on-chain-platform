@@ -10,7 +10,7 @@ import {
 } from '@rainbow-me/rainbowkit';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Navigate, Route, Routes } from 'react-router-dom';
-import { baseSepolia } from 'viem/chains';
+import { arbitrum } from 'viem/chains';
 import { useAccount } from 'wagmi';
 
 import MobileScreensContainer from './components/layouts/MobileScreensContainer';
@@ -54,7 +54,7 @@ const App: React.FC = () => {
         status={authStatus}
       >
         <RainbowKitProvider
-          initialChain={chainId ?? baseSepolia}
+          initialChain={chainId ?? arbitrum}
           theme={lightTheme({
             accentColor: '#4200FF',
           })}

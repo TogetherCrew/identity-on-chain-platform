@@ -13,4 +13,11 @@ export const contracts = [
     easContractAddress: '0x4200000000000000000000000000000000000021',
     abi: [],
   },
+  {
+    chainId: 42_161,
+    easSchemaUUID:
+      '0x6b5b50f2de8b387664838bd3c751e21f6b9aac7cf4bf5b2fb86e760b89a8a22d',
+    easContractAddress: '0xbD75f629A22Dc1ceD33dDA0b68c546A1c035c458',
+    abi: [],
+  },
 ];
