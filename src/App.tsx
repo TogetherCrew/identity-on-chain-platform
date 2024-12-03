@@ -3,8 +3,6 @@ import '@rainbow-me/rainbowkit/styles.css';
 
 import React from 'react';
 import { useMediaQuery } from '@mui/material';
-import CssBaseline from '@mui/material/CssBaseline';
-import { ThemeProvider } from '@mui/material/styles';
 import {
   lightTheme,
   RainbowKitAuthenticationProvider,
@@ -64,39 +62,36 @@ const App: React.FC = () => {
             appName: 'LogID',
           }}
         >
-          <ThemeProvider theme={theme}>
-            <CssBaseline />
-            <Routes>
+          <Routes>
+            <Route
+              path="/auth/login"
+              element={
+                authStatus === 'authenticated' ? (
+                  <Navigate to="/" replace />
+                ) : (
+                  <Login />
+                )
+              }
+            />
+            <Route
+              element={
+                <ProtectedRoute>
+                  <DefaultLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route path="/" element={<Navigate to="/identifiers" />} />
+              <Route path="/identifiers" element={<Identifiers />} />
               <Route
-                path="/auth/login"
-                element={
-                  authStatus === 'authenticated' ? (
-                    <Navigate to="/" replace />
-                  ) : (
-                    <Login />
-                  )
-                }
+                path="identifiers/:provider/attestation"
+                element={<Attestation />}
               />
-              <Route
-                element={
-                  <ProtectedRoute>
-                    <DefaultLayout />
-                  </ProtectedRoute>
-                }
-              >
-                <Route path="/" element={<Navigate to="/identifiers" />} />
-                <Route path="/identifiers" element={<Identifiers />} />
-                <Route
-                  path="identifiers/:provider/attestation"
-                  element={<Attestation />}
-                />
-                <Route path="/permissions" element={<Permissions />} />
-              </Route>
-              <Route path="/callback" element={<Callback />} />
-              <Route path="*" element={<div>Not found</div>} />
-            </Routes>
-            <CustomSnackbar />
-          </ThemeProvider>
+              <Route path="/permissions" element={<Permissions />} />
+            </Route>
+            <Route path="/callback" element={<Callback />} />
+            <Route path="*" element={<div>Not found</div>} />
+          </Routes>
+          <CustomSnackbar />
         </RainbowKitProvider>
       </RainbowKitAuthenticationProvider>
     </QueryClientProvider>
