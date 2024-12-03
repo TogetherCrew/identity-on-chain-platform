@@ -2,6 +2,7 @@ import './App.css';
 import '@rainbow-me/rainbowkit/styles.css';
 
 import React from 'react';
+import { useMediaQuery } from '@mui/material';
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider } from '@mui/material/styles';
 import {
@@ -14,6 +15,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { baseSepolia } from 'viem/chains';
 import { useAccount } from 'wagmi';
 
+import MobileScreensContainer from './components/layouts/MobileScreensContainer';
 import { CustomSnackbar } from './components/shared/CustomSnackbar';
 import useSiweAuth from './hooks/useSiweAuth';
 import DefaultLayout from './layouts/DefaultLayout';
@@ -36,10 +38,16 @@ const queryClient = new QueryClient({
 });
 
 const App: React.FC = () => {
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('md'));
+
   const { authStatus, authenticationAdapter } = useSiweAuth();
   const { chainId } = useAccount();
 
   globalThis.Buffer = Buffer;
+
+  if (isSmallScreen) {
+    return <MobileScreensContainer />;
+  }
 
   return (
     <QueryClientProvider client={queryClient}>
