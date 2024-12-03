@@ -1,3 +1,4 @@
+/* eslint-disable react/no-array-index-key */
 import {
   Avatar,
   Card,
@@ -85,9 +86,9 @@ const CustomTable: React.FC<CustomTableProps<AccessData>> = ({
             ([applicationName, applications], rowIndex) => (
               <TableRow component={Card} key={rowIndex}>
                 <TableCell align="center" sx={{ padding: 1 }}>
-                  <div className="flex flex-col items-center justify-center text-center mx-auto space-y-2">
+                  <div className="flex flex-row items-center justify-center text-center mx-auto space-x-3">
                     <Avatar />
-                    <Typography>{applicationName}</Typography>
+                    <Typography>{capitalize(applicationName)}</Typography>
                   </div>
                 </TableCell>
                 {xcolumns.map((platform, colIndex) => {

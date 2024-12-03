@@ -41,7 +41,7 @@ function SidebarApp() {
             }}
           >
             <Typography variant="h6" fontWeight="bold">
-              LOGO
+              LogID
             </Typography>
           </Box>
         </Toolbar>

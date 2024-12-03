@@ -5,8 +5,8 @@ export function Login() {
   return (
     <div className="h-screen w-full flex">
       <Box className="w-1/4 p-8 flex flex-col justify-center items-center shadow-2xl">
-        <Typography variant="h6" fontWeight="bold" gutterBottom>
-          Welcome to OnChain
+        <Typography variant="h6" fontWeight="bold" gutterBottom color="primary">
+          Welcome to LogID
         </Typography>
         <Typography variant="body1" gutterBottom>
           Please connect your wallet to continue.

@@ -5,12 +5,14 @@ import React from 'react';
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider } from '@mui/material/styles';
 import {
+  lightTheme,
   RainbowKitAuthenticationProvider,
   RainbowKitProvider,
 } from '@rainbow-me/rainbowkit';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Navigate, Route, Routes } from 'react-router-dom';
-import { sepolia } from 'wagmi/chains';
+import { baseSepolia } from 'viem/chains';
+import { useAccount } from 'wagmi';
 
 import { CustomSnackbar } from './components/shared/CustomSnackbar';
 import useSiweAuth from './hooks/useSiweAuth';
@@ -35,6 +37,7 @@ const queryClient = new QueryClient({
 
 const App: React.FC = () => {
   const { authStatus, authenticationAdapter } = useSiweAuth();
+  const { chainId } = useAccount();
 
   globalThis.Buffer = Buffer;
 
@@ -44,7 +47,15 @@ const App: React.FC = () => {
         adapter={authenticationAdapter}
         status={authStatus}
       >
-        <RainbowKitProvider initialChain={sepolia}>
+        <RainbowKitProvider
+          initialChain={chainId ?? baseSepolia}
+          theme={lightTheme({
+            accentColor: '#4200FF',
+          })}
+          appInfo={{
+            appName: 'LogID',
+          }}
+        >
           <ThemeProvider theme={theme}>
             <CssBaseline />
             <Routes>
