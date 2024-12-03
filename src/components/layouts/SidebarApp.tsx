@@ -12,6 +12,7 @@ import {
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { DRAWER_WIDTH, SIDEBAR_MENU } from '../../libs/constants';
+import theme from '../../libs/theme';
 
 function SidebarApp() {
   const navigate = useNavigate();
@@ -41,23 +42,64 @@ function SidebarApp() {
             }}
           >
             <Typography variant="h6" fontWeight="bold">
-              LOGO
+              LogID
             </Typography>
           </Box>
         </Toolbar>
         <Divider />
-        <List>
+        <List sx={{ padding: 2 }}>
+          {' '}
           {SIDEBAR_MENU.map((item) => (
             <ListItemButton
               key={item.title}
-              sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}
-              selected={item.path === pathname}
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                gap: 1,
+                mt: 1,
+                padding: '8px 16px',
+                borderRadius: 2,
+                backgroundColor:
+                  item.path === pathname
+                    ? theme.palette.primary.main
+                    : 'transparent',
+                color:
+                  item.path === pathname
+                    ? theme.palette.primary.contrastText
+                    : theme.palette.text.primary,
+                '&:hover': {
+                  backgroundColor:
+                    item.path === pathname
+                      ? theme.palette.primary.main // Keep the same background for selected item
+                      : theme.palette.action.hover,
+                },
+                '&.Mui-selected': {
+                  backgroundColor: `${theme.palette.primary.main} !important`,
+                  color: theme.palette.primary.contrastText,
+                  '&:hover': {
+                    backgroundColor: `${theme.palette.primary.main} !important`, // Prevent hover effect from altering the background
+                  },
+                },
+              }}
               onClick={() => navigate(item.path)}
             >
-              <ListItemIcon sx={{ minWidth: 'auto' }}>
+              <ListItemIcon
+                sx={{
+                  minWidth: 'auto',
+                  color:
+                    item.path === pathname
+                      ? theme.palette.primary.contrastText
+                      : theme.palette.text.primary,
+                }}
+              >
                 <item.icon />
               </ListItemIcon>
-              <ListItemText>{item.title}</ListItemText>
+              <ListItemText
+                primary={item.title}
+                sx={{
+                  color: 'inherit',
+                }}
+              />
             </ListItemButton>
           ))}
         </List>

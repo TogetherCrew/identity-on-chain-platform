@@ -288,7 +288,7 @@ export function Permissions() {
           </Typography>
           <Alert severity="info" sx={{ mb: 2 }}>
             <b>Note</b>: The process of revoking or granting access to
-            applications may take some time.
+            applications may take 1-2 minutes to process.
           </Alert>
           <CustomTable
             xcolumns={providers}

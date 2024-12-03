@@ -34,7 +34,7 @@ describe('SidebarApp', () => {
     const drawer = screen.getByTestId('drawer_app');
     expect(drawer).toBeInTheDocument();
 
-    const logo = screen.getByText('LOGO');
+    const logo = screen.getByText('LogID');
     expect(logo).toBeInTheDocument();
 
     SIDEBAR_MENU.forEach((item) => {
