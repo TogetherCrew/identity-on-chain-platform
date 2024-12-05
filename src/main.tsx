@@ -6,7 +6,7 @@ import { CssBaseline } from '@mui/material';
 import { getDefaultConfig } from '@rainbow-me/rainbowkit';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
-import { arbitrum, baseSepolia, optimismSepolia } from 'viem/chains';
+import { arbitrum, baseSepolia, Chain } from 'viem/chains';
 import { http, WagmiProvider } from 'wagmi';
 
 import App from './App';
@@ -17,12 +17,17 @@ if (!import.meta.env.VITE_PROJECT_ID) {
 }
 const projectID = import.meta.env.VITE_PROJECT_ID;
 
-export const SUPPORTED_CHAINS = [baseSepolia, optimismSepolia, arbitrum];
+const isProduction = import.meta.env.VITE_IS_MAINNET === 'true';
+
+export const SUPPORTED_CHAINS: Chain[] = isProduction
+  ? [arbitrum]
+  : [baseSepolia];
 
 const config = getDefaultConfig({
   appName: 'Identity on chain platform',
   projectId: projectID,
-  chains: [optimismSepolia, baseSepolia, arbitrum],
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  chains: SUPPORTED_CHAINS as any,
   transports: SUPPORTED_CHAINS.reduce(
     (obj, chain) => ({ ...obj, [chain.id]: http() }),
     {}
