@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
 
 import useSnackbarStore from '../../store/useSnackbarStore';
 
@@ -41,22 +40,29 @@ apiInstance.interceptors.request.use(
 apiInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    const navigate = useNavigate();
-    const { showSnackbar } = useSnackbarStore();
-    if (error.response?.status === 400) {
-      showSnackbar('Bad Request', {
-        severity: 'error',
-      });
-    }
+    const { showSnackbar } = useSnackbarStore.getState();
 
     if (error.response?.status === 401) {
-      // Show the snackbar message
+      localStorage.removeItem('OCI_TOKEN');
       showSnackbar('Session expired. Please log in again.', {
-        severity: 'warning',
+        severity: 'error',
+        duration: 5000,
+        position: { vertical: 'bottom', horizontal: 'right' },
       });
-
-      // Redirect the user to the login page
-      navigate('/auth/login');
+      window.location.href = '/auth/login';
+    } else if (error.response?.status === 400) {
+      showSnackbar(`${error.response.data.message.message[0]}`, {
+        severity: 'warning',
+        duration: 5000,
+        position: { vertical: 'bottom', horizontal: 'right' },
+      });
+      window.location.href = '/auth/login';
+    } else {
+      showSnackbar('An unexpected error occurred.', {
+        severity: 'error',
+        duration: 5000,
+        position: { vertical: 'bottom', horizontal: 'right' },
+      });
     }
 
     return Promise.reject(error);
