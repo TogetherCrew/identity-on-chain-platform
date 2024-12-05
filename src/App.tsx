@@ -56,7 +56,7 @@ const App: React.FC = () => {
         status={authStatus}
       >
         <RainbowKitProvider
-          initialChain={chainId ?? isProduction ? arbitrum : baseSepolia}
+          initialChain={chainId ?? (isProduction ? arbitrum : baseSepolia)}
           theme={lightTheme({
             accentColor: '#4200FF',
           })}

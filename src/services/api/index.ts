@@ -51,11 +51,14 @@ apiInstance.interceptors.response.use(
       });
       window.location.href = '/auth/login';
     } else if (error.response?.status === 400) {
-      showSnackbar(`${error.response.data.message.message[0]}`, {
-        severity: 'warning',
-        duration: 5000,
-        position: { vertical: 'bottom', horizontal: 'right' },
-      });
+      showSnackbar(
+        `${error.response?.data?.message?.message?.[0] || 'Bad request'}`,
+        {
+          severity: 'warning',
+          duration: 5000,
+          position: { vertical: 'bottom', horizontal: 'right' },
+        }
+      );
       window.location.href = '/auth/login';
     } else {
       showSnackbar('An unexpected error occurred.', {
