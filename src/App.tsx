@@ -10,7 +10,7 @@ import {
 } from '@rainbow-me/rainbowkit';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Navigate, Route, Routes } from 'react-router-dom';
-import { arbitrum } from 'viem/chains';
+import { arbitrum, baseSepolia } from 'viem/chains';
 import { useAccount } from 'wagmi';
 
 import MobileScreensContainer from './components/layouts/MobileScreensContainer';
@@ -38,6 +38,8 @@ const queryClient = new QueryClient({
 const App: React.FC = () => {
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('md'));
 
+  const isProduction = import.meta.env.VITE_IS_MAINNET === 'true';
+
   const { authStatus, authenticationAdapter } = useSiweAuth();
   const { chainId } = useAccount();
 
@@ -54,7 +56,7 @@ const App: React.FC = () => {
         status={authStatus}
       >
         <RainbowKitProvider
-          initialChain={chainId ?? arbitrum}
+          initialChain={chainId ?? isProduction ? arbitrum : baseSepolia}
           theme={lightTheme({
             accentColor: '#4200FF',
           })}
