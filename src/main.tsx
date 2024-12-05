@@ -18,7 +18,6 @@ if (!import.meta.env.VITE_PROJECT_ID) {
 const projectID = import.meta.env.VITE_PROJECT_ID;
 
 const isProduction = import.meta.env.VITE_IS_MAINNET === 'true';
-console.log({ isProduction });
 
 export const SUPPORTED_CHAINS: Chain[] = isProduction
   ? [arbitrum]
