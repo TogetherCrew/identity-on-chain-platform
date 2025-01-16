@@ -57,5 +57,8 @@ export const useGetAttestations = (recipient: Address, chainId: number) => {
       return attestedResults.attestations;
     },
     enabled: !!recipient || !chainId,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    staleTime: 0,
   });
 };

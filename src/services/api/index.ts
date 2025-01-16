@@ -59,13 +59,16 @@ apiInstance.interceptors.response.use(
           position: { vertical: 'bottom', horizontal: 'right' },
         }
       );
-      window.location.href = '/auth/login';
+      // window.location.href = '/auth/login';
     } else {
-      showSnackbar('An unexpected error occurred.', {
-        severity: 'error',
-        duration: 5000,
-        position: { vertical: 'bottom', horizontal: 'right' },
-      });
+      showSnackbar(
+        `${error.response?.data?.message?.message || 'Internal server error'}`,
+        {
+          severity: 'error',
+          duration: 5000,
+          position: { vertical: 'bottom', horizontal: 'right' },
+        }
+      );
     }
 
     return Promise.reject(error);
