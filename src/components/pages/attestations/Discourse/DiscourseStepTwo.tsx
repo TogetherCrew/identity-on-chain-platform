@@ -15,11 +15,13 @@ import { FaDiscourse } from 'react-icons/fa';
 import { useVerifyDiscourseTopicMutation } from '../../../../services/api/eas/query';
 import useSnackbarStore from '../../../../store/useSnackbarStore';
 
-interface StepTwoProps {
+interface DiscourseStepTwoProps {
   handleNextStep: () => void;
 }
 
-const StepTwo: React.FC<StepTwoProps> = ({ handleNextStep }) => {
+const DiscourseStepTwo: React.FC<DiscourseStepTwoProps> = ({
+  handleNextStep,
+}) => {
   const { showSnackbar } = useSnackbarStore();
   const { mutate: mutateVerifyDiscourseTopicUrl, isPending } =
     useVerifyDiscourseTopicMutation();
@@ -149,4 +151,4 @@ const StepTwo: React.FC<StepTwoProps> = ({ handleNextStep }) => {
   );
 };
 
-export default StepTwo;
+export default DiscourseStepTwo;

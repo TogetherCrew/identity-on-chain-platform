@@ -17,11 +17,13 @@ import useSnackbarStore from '../../../../store/useSnackbarStore';
 import { contracts } from '../../../../utils/contracts/eas/contracts';
 import { useSigner } from '../../../../utils/eas-wagmi-utils';
 
-interface StepFourProps {
+interface DiscourseStepFourProps {
   attestedSignutare: AttestPayload | null;
 }
 
-const StepFour: React.FC<StepFourProps> = ({ attestedSignutare }) => {
+const DiscourseStepFour: React.FC<DiscourseStepFourProps> = ({
+  attestedSignutare,
+}) => {
   const { showSnackbar } = useSnackbarStore();
   const navigate = useNavigate();
   const signer = useSigner();
@@ -99,4 +101,4 @@ const StepFour: React.FC<StepFourProps> = ({ attestedSignutare }) => {
   );
 };
 
-export default StepFour;
+export default DiscourseStepFour;

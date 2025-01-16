@@ -3,12 +3,16 @@ import { jwtDecode } from 'jwt-decode';
 import { FaDiscourse } from 'react-icons/fa';
 
 import { useGenerateDiscourseVerificationTokenMutation } from '../../../../services/api/eas/query';
+import useSnackbarStore from '../../../../store/useSnackbarStore';
 
-interface StepOneProps {
+interface DiscourseStepOneProps {
   handleNextStep: () => void;
 }
 
-const StepOne: React.FC<StepOneProps> = ({ handleNextStep }) => {
+const DiscourseStepOne: React.FC<DiscourseStepOneProps> = ({
+  handleNextStep,
+}) => {
+  const { showSnackbar } = useSnackbarStore();
   const { mutate: mutateGenerateDiscourseVerificationToken, isPending } =
     useGenerateDiscourseVerificationTokenMutation();
 
@@ -35,6 +39,12 @@ const StepOne: React.FC<StepOneProps> = ({ handleNextStep }) => {
         },
         onError: (error) => {
           console.error('Failed to generate token:', error);
+          showSnackbar(
+            'Failed to generate verification token. Please try again.',
+            {
+              severity: 'error',
+            }
+          );
         },
       }
     );
@@ -70,4 +80,4 @@ const StepOne: React.FC<StepOneProps> = ({ handleNextStep }) => {
   );
 };
 
-export default StepOne;
+export default DiscourseStepOne;

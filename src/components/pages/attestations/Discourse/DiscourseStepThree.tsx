@@ -14,12 +14,12 @@ import { AttestPayload } from '../../../../interfaces';
 import { useLinkIdentifierMutation } from '../../../../services/api/eas/query';
 import { capitalize } from '../../../../utils/helper';
 
-interface StepThreeProps {
+interface DiscourseStepThreeProps {
   provider: Provider | undefined;
   handlePrepareAttestation: (payload: AttestPayload) => void;
 }
 
-const StepThree: React.FC<StepThreeProps> = ({
+const DiscourseStepThree: React.FC<DiscourseStepThreeProps> = ({
   provider,
   handlePrepareAttestation,
 }) => {
@@ -93,4 +93,4 @@ const StepThree: React.FC<StepThreeProps> = ({
   );
 };
 
-export default StepThree;
+export default DiscourseStepThree;
