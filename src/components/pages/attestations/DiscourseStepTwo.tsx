@@ -12,8 +12,8 @@ import {
 import { Controller, useForm } from 'react-hook-form';
 import { FaDiscourse } from 'react-icons/fa';
 
-import { useVerifyDiscourseTopicMutation } from '../../../../services/api/eas/query';
-import useSnackbarStore from '../../../../store/useSnackbarStore';
+import { useVerifyDiscourseTopicMutation } from '../../../services/api/eas/query';
+import useSnackbarStore from '../../../store/useSnackbarStore';
 
 interface DiscourseStepTwoProps {
   handleNextStep: () => void;

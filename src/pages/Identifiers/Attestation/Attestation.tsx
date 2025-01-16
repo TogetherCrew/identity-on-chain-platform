@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { Alert, AlertTitle, Paper } from '@mui/material';
 import { useParams } from 'react-router-dom';
 
-import DiscourseStepFour from '../../../components/pages/Attestations/Discourse/DiscourseStepFour';
-import DiscourseStepOne from '../../../components/pages/Attestations/Discourse/DiscourseStepOne';
-import DiscourseStepThree from '../../../components/pages/Attestations/Discourse/DiscourseStepThree';
-import DiscourseStepTwo from '../../../components/pages/Attestations/Discourse/DiscourseStepTwo';
+import DiscourseStepFour from '../../../components/pages/Attestations/DiscourseStepFour';
+import DiscourseStepOne from '../../../components/pages/Attestations/DiscourseStepOne';
+import DiscourseStepThree from '../../../components/pages/Attestations/DiscourseStepThree';
+import DiscourseStepTwo from '../../../components/pages/Attestations/DiscourseStepTwo';
 import StepOne from '../../../components/pages/Attestations/StepOne';
 import StepThree from '../../../components/pages/Attestations/StepThree';
 import StepTwo from '../../../components/pages/Attestations/StepTwo';

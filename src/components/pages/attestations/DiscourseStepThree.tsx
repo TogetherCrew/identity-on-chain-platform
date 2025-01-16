@@ -9,10 +9,10 @@ import {
 import { FaLink } from 'react-icons/fa6';
 import { useAccount } from 'wagmi';
 
-import { Provider } from '../../../../enums';
-import { AttestPayload } from '../../../../interfaces';
-import { useLinkIdentifierMutation } from '../../../../services/api/eas/query';
-import { capitalize } from '../../../../utils/helper';
+import { Provider } from '../../../enums';
+import { AttestPayload } from '../../../interfaces';
+import { useLinkIdentifierMutation } from '../../../services/api/eas/query';
+import { capitalize } from '../../../utils/helper';
 
 interface DiscourseStepThreeProps {
   provider: Provider | undefined;

@@ -11,11 +11,11 @@ import { useNavigate } from 'react-router-dom';
 import { Address } from 'viem';
 import { useAccount } from 'wagmi';
 
-import { AttestPayload } from '../../../../interfaces';
-import EASService from '../../../../services/eas.service';
-import useSnackbarStore from '../../../../store/useSnackbarStore';
-import { contracts } from '../../../../utils/contracts/eas/contracts';
-import { useSigner } from '../../../../utils/eas-wagmi-utils';
+import { AttestPayload } from '../../../interfaces';
+import EASService from '../../../services/eas.service';
+import useSnackbarStore from '../../../store/useSnackbarStore';
+import { contracts } from '../../../utils/contracts/eas/contracts';
+import { useSigner } from '../../../utils/eas-wagmi-utils';
 
 interface DiscourseStepFourProps {
   attestedSignutare: AttestPayload | null;

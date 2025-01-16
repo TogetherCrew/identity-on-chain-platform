@@ -2,8 +2,8 @@ import { Box, Button, Stack, Typography } from '@mui/material';
 import { jwtDecode } from 'jwt-decode';
 import { FaDiscourse } from 'react-icons/fa';
 
-import { useGenerateDiscourseVerificationTokenMutation } from '../../../../services/api/eas/query';
-import useSnackbarStore from '../../../../store/useSnackbarStore';
+import { useGenerateDiscourseVerificationTokenMutation } from '../../../services/api/eas/query';
+import useSnackbarStore from '../../../store/useSnackbarStore';
 
 interface DiscourseStepOneProps {
   handleNextStep: () => void;
