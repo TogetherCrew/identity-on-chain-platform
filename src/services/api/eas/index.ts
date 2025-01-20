@@ -18,6 +18,15 @@ export interface DecryptAttestationsSecretParams {
   chainId?: number;
 }
 
+export interface GenerateDiscourseVerificationTokenParams {
+  siweJwt: string;
+}
+
+export interface VerifyDiscourseTopicParams {
+  topicUrl: string;
+  verificationJwt: string;
+}
+
 export const linkIdentifier = async ({
   siweJwt,
   anyJwt,
@@ -49,5 +58,21 @@ export const decryptAttestationsSecret = async ({
   return api.post(`/eas/${uid}/decrypt-attestation-secret`, {
     siweJwt,
     chainId,
+  });
+};
+
+export const generateDiscourseVerificationToken = async ({
+  siweJwt,
+}: GenerateDiscourseVerificationTokenParams) => {
+  return api.post('/discourse-verification/token', { siweJwt });
+};
+
+export const verifyDiscourseTopic = async ({
+  topicUrl,
+  verificationJwt,
+}: VerifyDiscourseTopicParams) => {
+  return api.post('/discourse-verification/verify', {
+    topicUrl,
+    verificationJwt,
   });
 };

@@ -20,7 +20,7 @@ import {
   Typography,
 } from '@mui/material';
 import clsx from 'clsx';
-import { FaDiscord, FaGoogle } from 'react-icons/fa';
+import { FaDiscord, FaDiscourse, FaGoogle } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { Address } from 'viem';
 import { useAccount } from 'wagmi';
@@ -50,6 +50,7 @@ export default function Identifiers() {
   const { showSnackbar } = useSnackbarStore();
   const [userIdentifiers, setUserIdentifiers] = useState<Identifier[]>([
     { name: 'Discord', icon: FaDiscord, verified: false, uid: '' },
+    { name: 'Discourse', icon: FaDiscourse, verified: false, uid: '' },
     { name: 'Google', icon: FaGoogle, verified: false, uid: '' },
   ]);
   const [openTooltips, setOpenTooltips] = useState<{ [key: string]: boolean }>(
@@ -124,6 +125,10 @@ export default function Identifiers() {
 
       showSnackbar('Attestation Revoke successfully completed.', {
         severity: 'success',
+      });
+
+      await new Promise((resolve) => {
+        setTimeout(resolve, 2000);
       });
 
       await refetch();

@@ -28,5 +28,13 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": [".prettierrc.cjs", ".eslintrc.cjs", "src"]
+  "include": [
+    ".prettierrc.cjs",
+    ".eslintrc.cjs",
+    "src",
+    "src/**/*.tsx",
+    "src/**/*.ts",
+    "src/**/**/*.tsx",
+    "src/**/**/*.ts"
+  ]
 }
