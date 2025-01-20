@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { Alert, AlertTitle, Paper } from '@mui/material';
 import { useParams } from 'react-router-dom';
 
-import DiscourseStepFour from '../../../components/pages/Attestations/DiscourseStepFour';
-import DiscourseStepOne from '../../../components/pages/Attestations/DiscourseStepOne';
-import DiscourseStepThree from '../../../components/pages/Attestations/DiscourseStepThree';
-import DiscourseStepTwo from '../../../components/pages/Attestations/DiscourseStepTwo';
+// import DiscourseStepFour from '../../../components/pages/Attestations/DiscourseStepFour';
+// import DiscourseStepOne from '../../../components/pages/Attestations/DiscourseStepOne';
+// import DiscourseStepThree from '../../../components/pages/Attestations/DiscourseStepThree';
+// import DiscourseStepTwo from '../../../components/pages/Attestations/DiscourseStepTwo';
 import StepOne from '../../../components/pages/Attestations/StepOne';
 import StepThree from '../../../components/pages/Attestations/StepThree';
 import StepTwo from '../../../components/pages/Attestations/StepTwo';
@@ -51,7 +51,7 @@ export default function Attestation() {
     return (
       <>
         <CustomBreadcrumb breadcrumbs={breadcrumbs} className="pb-3" />
-        <Paper
+        {/* <Paper
           sx={{
             height: 'calc(100vh - 140px)',
             p: 2,
@@ -87,7 +87,7 @@ export default function Attestation() {
           {activeStep === 3 && (
             <DiscourseStepFour attestedSignutare={attestedSignutare} />
           )}
-        </Paper>
+        </Paper> */}
       </>
     );
   }

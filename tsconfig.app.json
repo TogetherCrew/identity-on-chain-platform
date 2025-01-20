@@ -8,10 +8,9 @@
     "module": "ESNext",
     "skipLibCheck": true,
     "types": ["vitest/globals", "@testing-library/jest-dom"],
-    "allowSyntheticDefaultImports": true,
 
     /* Bundler mode */
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
@@ -35,6 +34,5 @@
     "src",
     "src/**/*.tsx",
     "src/**/*.ts"
-  ],
-  "exclude": ["node_modules", "dist"]
+  ]
 }
