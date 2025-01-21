@@ -33,7 +33,6 @@ const useSiweAuth = () => {
         statement: 'Sign in with Ethereum to the app.',
       });
     },
-    // getMessageBody: ({ message }) => message,
     verify: async ({ message, signature }) => {
       const { data } = await api.post('auth/siwe/verify', {
         message,
