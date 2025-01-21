@@ -8,7 +8,7 @@ import { getAddress } from 'viem';
 import { createSiweMessage } from 'viem/siwe';
 import { useAccount } from 'wagmi';
 
-import { api } from '../services/api';
+import { api, baseURL } from '../services/api';
 
 const useSiweAuth = () => {
   const { chainId } = useAccount();
@@ -19,6 +19,8 @@ const useSiweAuth = () => {
 
   const authenticationAdapter = createAuthenticationAdapter({
     getNonce: async () => {
+      console.log({ baseURL });
+
       const { data } = await api.get('auth/siwe/nonce');
       return data.nonce;
     },
