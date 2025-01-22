@@ -36,12 +36,16 @@ import useSnackbarStore from '../../store/useSnackbarStore';
 import { contracts } from '../../utils/contracts/eas/contracts';
 import { useSigner } from '../../utils/eas-wagmi-utils';
 
+interface IMetadata {
+  baseURL: string;
+  id: string;
+}
 interface Identifier {
   name: string;
   icon: React.ElementType;
   verified: boolean;
   uid: string;
-  revealedSecret?: string;
+  revealedSecret?: string | IMetadata;
 }
 
 export default function Identifiers() {
@@ -50,9 +54,15 @@ export default function Identifiers() {
   const { showSnackbar } = useSnackbarStore();
   const [userIdentifiers, setUserIdentifiers] = useState<Identifier[]>([
     { name: 'Discord', icon: FaDiscord, verified: false, uid: '' },
-    { name: 'Discourse', icon: FaDiscourse, verified: false, uid: '' },
+    {
+      name: 'Discourse',
+      icon: FaDiscourse,
+      verified: false,
+      uid: '',
+    },
     { name: 'Google', icon: FaGoogle, verified: false, uid: '' },
   ]);
+
   const [openTooltips, setOpenTooltips] = useState<{ [key: string]: boolean }>(
     {}
   );
@@ -105,6 +115,7 @@ export default function Identifiers() {
         userIdentifiers,
         attestations
       );
+
       setUserIdentifiers(resolvedIdentifiers);
     } else {
       setUserIdentifiers((prev) =>
@@ -195,6 +206,16 @@ export default function Identifiers() {
             setUserIdentifiers((prev) =>
               prev.map((id) => {
                 if (id.uid === identifier.uid) {
+                  if (identifier.name === 'Discourse') {
+                    return {
+                      ...id,
+                      revealedSecret: {
+                        id: response.data.id,
+                        baseURL: response.data.metadata.baseURL,
+                      },
+                    };
+                  }
+
                   return {
                     ...id,
                     revealedSecret: response.data.id,
@@ -239,6 +260,23 @@ export default function Identifiers() {
     }
 
     return identifier.verified ? 'Revoke' : 'Connect';
+  };
+
+  const getRevealedSecret = (identifier: Identifier | null) => {
+    if (!identifier) return 'No data available';
+
+    if (identifier.name === 'Discourse' && identifier.revealedSecret) {
+      if (typeof identifier.revealedSecret === 'object') {
+        const { id, baseURL } = identifier.revealedSecret;
+        return `Topic ID: ${id || 'N/A'} - Topic URL: ${baseURL || 'N/A'}`;
+      }
+    }
+
+    if (identifier.revealedSecret) {
+      return `Account ID: ${identifier.revealedSecret || 'N/A'}`;
+    }
+
+    return 'No data available';
   };
 
   if (attestationsLoading) {
@@ -309,8 +347,7 @@ export default function Identifiers() {
                           loading[identifier.uid] ? (
                             <CircularProgress color="inherit" size={20} />
                           ) : (
-                            identifier.revealedSecret &&
-                            `Account ID: ${identifier.revealedSecret}`
+                            `${getRevealedSecret(identifier)}`
                           )
                         }
                         arrow
